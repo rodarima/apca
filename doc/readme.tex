@@ -1,0 +1,66 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+
+\usepackage{minted}
+\newminted{py}{%
+%		linenos,
+		fontsize=\footnotesize,
+		tabsize=2,
+		mathescape,
+}
+\newminted{text}{%
+%		linenos,
+		fontsize=\footnotesize,
+		tabsize=2,
+		mathescape,
+}
+
+\title{Approximated PCA}
+\author{Rodrigo Arias Mallo}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+The PCA method transforms a set of observations of possibly correlated variables 
+into a set of values of linearly uncorrelated variables called principal 
+components using an orthogonal transformation (rotations and reflections).
+
+The transformation, projects the data in a new subspace, in which each new 
+variable it's now uncorrelated. That means that the covariance of each pair of 
+new variables is zero.
+%
+To compute the transformation, different approaches can be taken. In a first 
+attempt, the covariance matrix will be used.
+%
+Let $x_{ij}$ be the observation $j$ of the variable $i$. Let $n$ be the number 
+of variables and $m$ the number of observations.
+%
+Each element $s_{ij}$ in the covariance matrix $S$ is computed by
+%
+$$ s_{ij} = \frac{\sum x_{ik} x_{jk} - \sum x_{ij} x_{jk}}{n (n-1)} $$
+%
+Once the covariance matrix $S$ in computed, it can be used to find his 
+eigenvalues and eigenvectors. One method to compute those values, is a 
+combination of a Householder transformation, followed by the QR transformation.  
+The first will transform $S$ in a product of two matrix $Q$ and $R$.
+%
+	$$ S = QR $$
+%
+Such that $R$ contains 3 diagonals (tridiagonal) with elements and zeros in the 
+rest. The QR transformation then takes this two matrices, and computes 
+iteratively a new diagonal matrix $A^{(i+1)} = R^{(i)} Q^{(i)}$. Finally, the 
+eigenvalues are in the diagonal of $A$ and the eigenvectors are computed from 
+these.
+
+\section{Householder transformation}
+
+The Householder transformation of $S$ in a tridiagonal matrix has the property 
+that the eigenvalues are preserved.
+
+\end{document}
