@@ -19,6 +19,8 @@
 		mathescape,
 }
 
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
 \title{Approximated PCA}
 \author{Rodrigo Arias Mallo}
 
@@ -58,9 +60,33 @@ iteratively a new diagonal matrix $A^{(i+1)} = R^{(i)} Q^{(i)}$. Finally, the
 eigenvalues are in the diagonal of $A$ and the eigenvectors are computed from 
 these.
 
-\section{Householder transformation}
+\section{Householder tridiagonalization}
 
-The Householder transformation of $S$ in a tridiagonal matrix has the property 
-that the eigenvalues are preserved.
+The Householder tridiagonalization it's a process where a matrix $A$ is 
+transformed by multiplying with an orthogonal matrix $P^{(k)}$:
+%
+$P^{(k)} = I - 2ww^T$
+%
+Such matrix $P^{(k)}$ has been prepared, so that $P^{(k)}A$ is a new matrix, 
+with zeros below the $k+1$ element in the $k$ column. This new matrix, has the 
+same eigenvalues as the provious $A$. The step is repeated until the final 
+matrix has only elements in the diagonal, and the two sub-diagonals. The process 
+is similar to a Gaussian elimination.
+
+\section{Eigenvalue sensitivity}
+
+% Extracted from Golub, Van Loan - Matrix multiplications.
+
+Corolary 8.1.6: If $A$ and $A+E$ are \textit{n-by-n} symmetric matrices, then
+%
+$$ |\lambda_k(A+E) - \lambda_k(A)| \le \norm{E}_2 $$
+%
+for $k = 1:n$.
+
+Then, the difference between the eigenvalue of a noisy matrix, and the original, 
+can be bounded by the 2-norm of $E$, also the maximum eigenvalue of $E$.
+
+
+
 
 \end{document}
