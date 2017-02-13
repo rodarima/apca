@@ -26,6 +26,8 @@
    F. Murtagh, Munich, 6 June 1989                                   */   
 /*********************************************************************/
 
+#include "pca.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -58,7 +60,7 @@ void print_vector(float *vec, int n)
 }
 
 
-main(argc, argv)
+main2(argc, argv)
 int argc;
 char *argv[];
 
