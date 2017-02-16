@@ -20,6 +20,7 @@ float norm2(float **a, int n, int m)
 	return sqrt(accum);
 }
 
+
 float frand()
 {
 	return ((float) rand()) / ((float) RAND_MAX) * 2.0 - 1.0;

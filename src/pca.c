@@ -42,7 +42,7 @@ void print_matrix(float **mat, int n, int m)
 	{
 		for(j=1; j<=m; j++)
 		{
-			printf("%f ", mat[i][j]);
+			printf("%5.2f ", mat[i][j]);
 		}
 		printf("\n");
 	}
@@ -697,8 +697,9 @@ void tqli(d, e, n, z)
 				e[l] = g;
 				e[m] = 0.0;
 			}
-		printf("TLQI: Iteration %d, g=%f\n", iter, g);
-		}  while (m != l);
+			printf("TLQI: Iteration %d, g=%f, m=%d, l=%d\n", iter, g, m, l);
+		}
+		while (m != l);
 	}
 }
 //***************************************************************************
