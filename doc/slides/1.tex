@@ -3,6 +3,8 @@
 \usepackage{graphicx} % Allows including images
 \usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
 
+\usepackage{color}
+
 \usepackage{algorithm2e}
 \usepackage{hyperref}
 
@@ -10,7 +12,13 @@
 \newcommand*\arr[1]{ \begin{bmatrix} #1 \end{bmatrix}}
 \newcommand*\V[1]{ \boldsymbol{#1}}
 
+\newcommand*\D{\textcolor{violet}{D}}
+\newcommand*\T{\textcolor{blue}{T}}
+
 \setbeamertemplate{navigation symbols}{}%remove navigation symbols
+
+\setbeamerfont{page number in head/foot}{size=\small}
+\setbeamertemplate{footline}[frame number]
 
 \title{Approximated PCA}
 
@@ -30,9 +38,9 @@
 \frametitle{PCA algorithm}
 
 \begin{enumerate}
-\item Take a dataset $X$.
+\item Take a dataset $X$ of $n$ variables.
 \item Scale and center the variables.
-\item From $X$ compute the covariance matrix $S$.
+\item From $X$ compute the $n\times n$ covariance matrix $S$.
 \item \textbf{Compute the eigenvalues and eigenvectors of $S$.}
 \item \textit{Optional: Ignore some eigenvectors.}
 \item Generate a new basis from the selected eigenvectors.
@@ -50,13 +58,51 @@ Computing the eigenvectors is the principal step of PCA.
 \begin{frame}
 
 \frametitle{Visual example}
-The input dataset with 800 variables $X$ = 
+
+The input dataset with $n=800$ variables and 1023 observations (columns),
+
+$$ X=
+	\mat{
+		x_{1,1} & x_{1,2} 	& \dots & x_{1,1023}  \\
+		x_{2,1} & x_{2,2}  	& \dots & x_{2,1023}  \\
+		\vdots  & \vdots  	&       & \vdots      \\
+		x_{800,1} & x_{800,2} & \dots & x_{800,1023} \\
+	}
+$$
+
+Each pixel $x_{i,j}$ is a value in $[0, 255]$ of the gray level in the image.  
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Visual example}
+
+The input dataset with $n=800$ variables and 1023 observations (columns), $X =$
 
 \begin{center}
-\includegraphics[width=\textheight]{input}
+\includegraphics[scale=0.2]{input}
+\end{center}
+
+Each pixel $x_{i,j}$ is a value in $[0, 255]$ of the gray level in the image.  
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Visual example}
+Keep 800 eigenvectors. Output:
+
+\begin{center}
+\includegraphics[width=\textheight]{out-800}
 \end{center}
 
 \end{frame}
+
 
 %------------------------------------------------
 
@@ -104,11 +150,12 @@ Keep 40 eigenvectors. Output:
 \frametitle{Computing eigenvalues and eigenvectors}
 
 \begin{enumerate}
-\item Take the target matrix $A$.
-\item Compute a tridiagonal matrix $T$, $A = PTP^T$.
-\item From $T$ compute a diagonal matrix $D$, $T = QTQ^T$.
-\item The eigenvalues of $A$ are in the diagonal of $D$.
-\item Compute the eigenvectors from $D$.
+\item Take the $n\times n$ target matrix $A = S$.
+\item Compute a \textcolor{blue}{tridiagonal} matrix $\T$: $A = P \T P^T$.
+\item From $\T$ compute a \textcolor{violet}{diagonal} matrix $\D$: $\T = Q \D 
+Q^T$.
+\item The eigenvalues of $A$ are in the diagonal of $\D$.
+\item Compute the eigenvectors from $\D$.
 \end{enumerate}
 
 \pause
@@ -126,8 +173,8 @@ diagonal, \textbf{diagonalization}. Several algorithms exists for both steps.
 \frametitle{Tridiagonalization}
 %
 These algorithms transform a \textbf{symmetric} matrix $A$ into a new pair of 
-matrices $P$ and $T$ such that $P$ is orthogonal, $T$ is tridiagonal, and $A = 
-PTP^T$
+matrices $P$ and $\T$ such that $P$ is orthogonal, $\T$ is tridiagonal, and $A = 
+P \T P^T$
 %
 $$
 	\mat{
@@ -136,14 +183,15 @@ $$
 		a_{31} & a_{32} & a_{33} & a_{34} \\
 		a_{41} & a_{42} & a_{43} & a_{44} \\
 	} =
-	Q
+	P
+	\textcolor{blue}{
 	\mat{
 		t_{11} & t_{12} &        &        \\
 		t_{21} & t_{22} & t_{23} &        \\
 		       & t_{32} & t_{33} & t_{34} \\
 		       &        & t_{43} & t_{44} \\
-	}
-	Q^T
+	}}
+	P^T
 $$
 %
 \end{frame}
@@ -166,7 +214,8 @@ $$
 	\bottomrule
 \end{tabular}
 \end{center}
-Where $k$ is some constant, and $p$ the number of iterations.
+Where $n \times n$ is the dimension of the matrix $A$, $k$ is some constant, and 
+$p$ the number of iterations.
 \end{frame}
 
 %------------------------------------------------
@@ -175,28 +224,30 @@ Where $k$ is some constant, and $p$ the number of iterations.
 %
 \frametitle{Diagonalization}
 %
-These algorithms take a \textbf{tridiagonal} matrix $T$ into a new pair of 
-matrices $Q$ and $D$ such that $Q$ is orthogonal, $D$ is diagonal, and $T = 
-QDQ^T$
+These algorithms take a \textbf{tridiagonal} matrix $\T$ into a new pair of 
+matrices $Q$ and $\D$ such that $Q$ is orthogonal, $\D$ is diagonal, and $\T = Q 
+\D Q^T$
 %
 $$
+	\textcolor{blue}{
 	\mat{
 		t_{11} & t_{12} &        &        \\
 		t_{21} & t_{22} & t_{23} &        \\
 		       & t_{32} & t_{33} & t_{34} \\
 		       &        & t_{43} & t_{44} \\
-	}=
+	}}=
 	Q
+	\textcolor{violet}{
 	\mat{
 		d_{11} &        &        &        \\
 		       & d_{22} &        &        \\
 		       &        & d_{33} &        \\
 		       &        &        & d_{44} \\
-	}
+	}}
 	Q^T
 $$
 %
-The matrix $D$ contains the \textbf{eigenvalues} in the diagonal.
+The matrix $\D$ contains the \textbf{eigenvalues} in the diagonal.
 \end{frame}
 
 %------------------------------------------------
@@ -208,17 +259,20 @@ The matrix $D$ contains the \textbf{eigenvalues} in the diagonal.
 \begin{center}
 \begin{tabular}{c c c c}
 	\toprule
-	Algorithm 		& Complexity  & Iterative & Convergence\\
+	Algorithm							& Complexity  & Convergence	\\
 	\midrule
-	QR                  & $O(6n^3)$ 	& Yes       & Cubic \\
-	Divide and conquer  & $O(8n^3/3)$ & Yes       & Quadratic \\
-	Jacobi              & $O(n^3)$    & Yes       & Quadratic \\
-	Power iteration			& $O(n^3)$    & Yes       & Linear \\
-	Inverse iteration	  & $O(n^3)$    & Yes       & Linear \\
-	Others				&             &          \\
+	QR                  & $O(6n^3)$ 	& Cubic 			\\
+	Divide and conquer  & $O(8n^3/3)$ & Quadratic 	\\
+	Jacobi              & $O(n^3)$    & Quadratic 	\\
+	Power iteration			& $O(n^3)$    & Linear 			\\
+	Inverse iteration	  & $O(n^3)$    & Linear 			\\
+	Others							&             &          		\\
 	\bottomrule
 \end{tabular}
 \end{center}
+%
+All these algorithms are iterative and $n \times n$ is the dimension of the 
+matrix $A$.
 \end{frame}
 
 %------------------------------------------------
