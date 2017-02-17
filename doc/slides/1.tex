@@ -287,5 +287,79 @@ Householder + QR
 
 %------------------------------------------------
 
+\begin{frame}
+%
+\frametitle{Approximated computing}
+%
+Maximize an utility function, based on your preferences:
+$$ \max \; u(E, T, n, \epsilon, C, \ldots) $$
+
+\begin{center}
+\begin{tabular}{c l}
+	$E$ & Energy consumption \\
+	$T$ & Time taken\\
+	$n$ & Problem size \\
+	$\epsilon$ & Error in the result \\
+	C &  Economical cost \\
+	$u()$ & Utility function \\
+\end{tabular}
+\end{center}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+%
+\frametitle{Techniques: Deterministic}
+%
+\begin{itemize}
+\item \textbf{Bit-Width Reduction}
+\item Float-to-Fixed Conversion
+\item Fuzzy Memoization
+\item Hierarchical FPU
+\item Load Value Approximation
+\item Lossy Compression and Data
+\item Packing
+\item Precision Scaling (ALU)
+\item Reduced-Precision FPU
+\item Underdesigned Multiplier
+\item ...
+\end{itemize}
+
+\pause
+
+Begin with bit-width reduction
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+%
+\frametitle{Bit-width reduction in Householder}
+%
+\begin{itemize}
+\item The Householder algorithm performs $n-2$ steps.
+\item In each step, a matrix multiplication is done.
+\item With less precision, the error in the final result can grow.
+\item Analyze how the error changes in Householder.
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+%
+\frametitle{Bit-width reduction in Householder}
+%
+\begin{itemize}
+\item Some theoretical bounds can be used to check the experimental error
+\item Design a emulator with an ALU of $b$ bit-width
+\item Test the algorithm in the emulator with different $b$, and check the 
+error.
+\end{itemize}
+
+\end{frame}
 
 \end{document}
