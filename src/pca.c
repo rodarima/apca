@@ -30,6 +30,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <math.h>
 
 #define SIGN(a, b) ( (b) < 0 ? -fabs(a) : fabs(a) )
@@ -60,7 +61,7 @@ void print_vector(float *vec, int n)
 }
 
 
-main2(argc, argv)
+int main2(argc, argv)
 int argc;
 char *argv[];
 
@@ -71,7 +72,7 @@ float **data, **matrix(), **symmat, **symmat2, *vector(), *evals, *interm;
 void free_matrix(), free_vector(), corcol(), covcol(), scpcol();
 void tred2(), tqli();
 float in_value;
-char option, *strncpy();
+char option;
 
 /*********************************************************************
    Get from command line:
@@ -174,7 +175,7 @@ char option, *strncpy();
                          */
               break;
           default:
-              printf("Option: %s\n",option);
+              printf("Option: %c\n",option);
               printf("For option, please type R, V, or S\n");
               printf("(upper or lower case).\n");
               printf("Exiting to system.\n");
@@ -274,6 +275,8 @@ char option, *strncpy();
     free_matrix(symmat2, m, m);
     free_vector(evals, m);
     free_vector(interm, m);
+
+    return 0;
 
 }
 
@@ -697,7 +700,7 @@ void tqli(d, e, n, z)
 				e[l] = g;
 				e[m] = 0.0;
 			}
-			printf("TLQI: Iteration %d, g=%f, m=%d, l=%d\n", iter, g, m, l);
+			//printf("TLQI: Iteration %d, g=%f, m=%d, l=%d\n", iter, g, m, l);
 		}
 		while (m != l);
 	}

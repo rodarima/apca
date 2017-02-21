@@ -1,5 +1,9 @@
-pca:
-	$(CC) -o pca -lm pca.c
+CC=gcc -g
+
+all: error big test
+
+pca.o:
+	$(CC) -c -lm pca.c
 
 error: pca.o error.c
 	$(CC) -o error -lm pca.o error.c
@@ -7,5 +11,8 @@ error: pca.o error.c
 big: pca.o big.c
 	$(CC) -o big -lm pca.o big.c
 
+test: pca.o test.c
+	$(CC) -o test -lm pca.o test.c
+
 clean:
-	rm -f pca
+	rm -f pca error big *.o
