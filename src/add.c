@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <mpfr.h>
+#include <fenv.h>
 
 #define RND MPFR_RNDZ
 
@@ -77,6 +78,11 @@ struct rnd_t
 	mpfr_rnd_t rnd;
 	char *rnd_str;
 };
+struct fe_t
+{
+	int rnd;
+	char *rnd_str;
+};
 
 #define N_RND_MODES 5
 struct rnd_t rnd_modes[N_RND_MODES] = {
@@ -87,10 +93,30 @@ struct rnd_t rnd_modes[N_RND_MODES] = {
 	{MPFR_RNDA, "Round away from zero"},
 };
 
+#define N_FE_MODES 4
+struct fe_t fe_modes[N_FE_MODES] = {
+	{FE_TONEAREST,  "Round to Nearest"},
+	{FE_TOWARDZERO, "Round toward zero"},
+	{FE_UPWARD,     "Round toward plus infinity"},
+	{FE_DOWNWARD,   "Round toward minus infinity"},
+};
+
 
 int main(int argc, char *argv[])
 {
-	int i,j;
+	int i,j, fe;
+	char *fe_str = NULL;
+
+	fe = fegetround();
+	for(i = 0; i < N_FE_MODES; i++)
+	{
+		if(fe_modes[i].rnd == fe)
+		{
+			fe_str = fe_modes[i].rnd_str;
+			break;
+		}
+	}
+	printf("FPU rounding mode: (%d) %s\n", fe, fe_str);
 
 	for(i = 0; i < N_RND_MODES; i++)
 	{

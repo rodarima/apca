@@ -107,7 +107,7 @@ int main()
 {
 	int i, j;
 
-	for(j = 22; j <= 30; j++)
+	for(j = 15; j <= 30; j++)
 		for(i = 0; i < N_RND_MODES; i++)
 			test(j, rnd_modes[i].rnd, rnd_modes[i].rnd_str);
 

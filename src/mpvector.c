@@ -5,6 +5,28 @@
 #include <stdio.h>
 #include "err.h"
 
+struct mptridiag_t *mptridiag_init(int n, mpfr_prec_t prec, mpfr_rnd_t rnd)
+{
+	struct mptridiag_t *td = malloc(sizeof(*td));
+	if(!td) erhand("Allocation failure in mptridiag_init().");
+	td->A = mpmatrix_init(n, n, prec);
+	td->diag = mpvector_init(n, prec);
+	td->offdiag = mpvector_init(n, prec);
+	td->n = n;
+	td->prec = prec;
+	td->rnd = rnd;
+
+	return td;
+}
+
+void mptridiag_free(struct mptridiag_t *td)
+{
+	mpmatrix_free(td->A, td->n, td->n);
+	mpvector_free(td->diag, td->n);
+	mpvector_free(td->offdiag, td->n);
+	free(td);
+}
+
 /**  Allocation of vector storage  ***********************************/
 
 /* Allocates a float vector with range [1..n]. */
@@ -25,6 +47,25 @@ mpfr_t *mpvector_init(int n, mpfr_prec_t prec)
 
 }
 
+void mpvector_diff(mpfr_t err, mpfr_t *a, mpfr_t *b, int n, mpfr_prec_t prec, mpfr_rnd_t rnd)
+{
+	int i;
+	mpfr_t tmp1;
+
+	mpfr_init2(tmp1, prec);
+	
+	mpfr_set_d(err, 0.0, rnd);
+
+	for(i = 1; i<=n; i++)
+	{
+		mpfr_sub(tmp1, a[i], b[i], rnd);
+		mpfr_mul(tmp1, tmp1, tmp1, rnd);
+		mpfr_add(err, err, tmp1, rnd);
+	}
+	mpfr_sqrt(err, err, rnd);
+
+	mpfr_clear(tmp1);
+}
 /**  Allocation of float matrix storage  *****************************/
 
 /* Allocate a float matrix with range [1..n][1..m]. */
