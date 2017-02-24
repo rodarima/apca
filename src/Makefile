@@ -14,6 +14,8 @@ mpvector.o: err.o
 
 precision: precision.c
 
+errhh: mpvector.o reduction.o err.o
+
 error: pca.o error.c
 
 big: pca.o big.c
