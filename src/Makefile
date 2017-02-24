@@ -1,22 +1,24 @@
 CC=gcc -g
 
+LDFLAGS=-lm -lmpfr
+
 all: error big test precision
 
+test: test_mpvector test_householder
+
+test_mpvector: err.o mpvector.o
+
+test_householder: err.o mpvector.o reduction.o
+
+mpvector.o: err.o
 
 precision: precision.c
-	$(CC) precision.c -lmpfr -o precision
-
-pca.o:
-	$(CC) -c -lm pca.c
 
 error: pca.o error.c
-	$(CC) -o error -lm pca.o error.c
 
 big: pca.o big.c
-	$(CC) -o big -lm pca.o big.c
 
-test: pca.o test.c
-	$(CC) -o test -lm pca.o test.c
+test2: pca.o test2.c
 
 clean:
 	rm -f pca error big precision *.o

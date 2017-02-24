@@ -5,7 +5,8 @@
 #include "pca.h"
 #include <math.h>
 
-#define N 10
+//#define N 10
+int N = 10;
 
 float norm2(float **a, int n, int m)
 {
@@ -72,6 +73,15 @@ void symmat_sum(float **a, float **b, float **c, int n)
 
 #define ITER 100
 
+struct eig_t
+{
+	float **A;
+	float *diag;
+	float *offdiag;
+	int n;
+};
+
+
 int test_hh()
 {
 	float **a, **e, **s;
@@ -132,9 +142,21 @@ int test_hh()
 	free_symmat(a, N);
 }
 
+void usage(int argc, char *argv[])
+{
+	printf("Usage: %s n\n", argv[0]);
+	printf("Where the matrix is n x n\n");
+	exit(1);
+}
+
 int main(int argc, char *argv[])
 {
+	if (argc != 2)
+		usage(argc, argv);
+	
 	srand(time(NULL));
+
+	N = atoi(argv[1]);
 
 	test_hh();
 
