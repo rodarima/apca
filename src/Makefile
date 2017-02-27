@@ -1,6 +1,6 @@
 CC=gcc -g
 
-LDFLAGS=-lm -lmpfr
+LDFLAGS=-lm -lmpfr -lgmp
 
 all: error big test precision
 
@@ -15,6 +15,10 @@ mpvector.o: err.o
 precision: precision.c
 
 errhh: mpvector.o reduction.o err.o
+
+%.png:
+	gnuplot $(basename $@).gp
+	sxiv $@
 
 error: pca.o error.c
 

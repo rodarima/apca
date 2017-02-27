@@ -8,6 +8,11 @@
 #define PREC 24 /* this machine is NOT IEEE 754 compliant */
 #define RND_DIR MPFR_RNDN
 
+#define GOLD_PREC 500
+#define PREC_MIN 2
+#define PREC_MAX 100
+#define RUNS 10000
+
 struct rnd_t
 {
 	mpfr_rnd_t rnd;
@@ -124,6 +129,36 @@ void errhh(struct mptridiag_t *gold, struct mptridiag_t *target)
 	mpfr_clear(err);
 }
 
+void rand_mpmat(struct mptridiag_t *rop, gmp_randstate_t state)
+{
+	int i, j;
+	mpfr_t **a = rop->A;
+
+	for(i = 1; i <= rop->n; i++)
+	{
+		for(j = 1; j <= rop->n; j++)
+		{
+			if(j >= i)
+			{
+				mpfr_urandom(a[i][j], state, rop->rnd);
+			}
+			else
+			{
+				mpfr_set(a[i][j], a[j][i], rop->rnd);
+			}
+		}
+	}
+}
+
+void copy_mpmat(struct mptridiag_t *rop, struct mptridiag_t *src)
+{
+	int i,j;
+
+	for(i = 1; i <= rop->n; i++)
+		for(j = 1; j <= rop->n; j++)
+			mpfr_set(rop->A[i][j], src->A[i][j], rop->rnd);
+}
+
 void load_matrix(struct mptridiag_t *rop, double A[N][N])
 {
 	int i,j;
@@ -133,33 +168,26 @@ void load_matrix(struct mptridiag_t *rop, double A[N][N])
 			mpfr_set_d(rop->A[i+1][j+1], A[i][j], rop->rnd);
 }
 
-#define GOLD_PREC 500
-#define PREC_MIN 2
-#define PREC_MAX 100
-
-int main()
+void test_rnd(gmp_randstate_t state)
 {
-	int i;
-	double AA[N][N] = {
-		{5,4,3,2,1},
-		{4,6,0,4,3},
-		{3,0,7,6,5},
-		{2,4,6,8,7},
-		{1,3,5,7,9},
-	};
+	int i, n = N;
+	struct mptridiag_t *gold, *target, *ref;
 
-	struct mptridiag_t *gold, *target;
+	gold = mptridiag_init(n, GOLD_PREC, RND_DIR);
+	ref = mptridiag_init(n, GOLD_PREC, RND_DIR);
+	//load_matrix(gold, AA);
+	rand_mpmat(ref, state);
+	copy_mpmat(gold, ref);
 
-	gold = mptridiag_init(N, GOLD_PREC, RND_DIR);
-	load_matrix(gold, AA);
 	hh(gold);
 	//printf("Gold diagonal:\n");
 	//mpvector_print(gold->diag, gold->n);
 
 	for(i = PREC_MIN; i<=PREC_MAX; i++)
 	{
-		target = mptridiag_init(N, i, RND_DIR);
-		load_matrix(target, AA);
+		target = mptridiag_init(n, i, RND_DIR);
+		//load_matrix(target, AA);
+		copy_mpmat(target, ref);
 		errhh(gold, target);
 		//printf("Target diagonal:\n");
 		//mpvector_print(target->diag, target->n);
@@ -168,5 +196,22 @@ int main()
 	
 	mptridiag_free(gold);
 
+}
+
+int main()
+{
+	int i;
+	gmp_randstate_t state;
+
+	gmp_randinit_default(state);
+
+	for(i = 0; i < RUNS; i++)
+	{
+		test_rnd(state);
+		if((i % (RUNS/10)) == 0)
+		{
+			fprintf(stderr, "Step %d of %d\n", i, RUNS);
+		}
+	}
 	return 0;
 }
