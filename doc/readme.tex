@@ -19,7 +19,19 @@
 		mathescape,
 }
 
+\usepackage{xcolor}
+
+% \toprule, \midrule and \bottomrule in tables
+\usepackage{booktabs}
+
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\newcommand*\mat[1]{ \begin{pmatrix} #1 \end{pmatrix}}
+\newcommand*\arr[1]{ \begin{bmatrix} #1 \end{bmatrix}}
+\newcommand*\V[1]{ \boldsymbol{#1}}
+
+\newcommand*\D{\textcolor{violet}{D}}
+\newcommand*\T{\textcolor{blue}{T}}
 
 \title{Approximated PCA}
 \author{Rodrigo Arias Mallo}
@@ -86,7 +98,123 @@ for $k = 1:n$.
 Then, the difference between the eigenvalue of a noisy matrix, and the original, 
 can be bounded by the 2-norm of $E$, also the maximum eigenvalue of $E$.
 
+\section{First approach}
 
+The first experiment to be carried out consists in determining which parts of 
+the algorithm can be suitable for approximate computing. The main steps of PCA 
+can be summarized as follow:
+%
+\begin{enumerate}
+\item Take a dataset $X$ of $n$ variables.
+\item Scale and center the variables.
+\item From $X$ compute the $n\times n$ covariance matrix $S$.
+\item \textbf{Compute the eigenvalues and eigenvectors of $S$.}
+\item \textit{Optional: Ignore some eigenvectors.}
+\item Generate a new basis from the selected eigenvectors.
+\item Project $X$ into the new basis.
+\end{enumerate}
+%
+Computing the eigenvectors is the principal step of PCA.
+
+\subsection{Computing eigenvalues and eigenvectors}
+
+\begin{enumerate}
+\item Take the $n\times n$ target matrix $A = S$.
+\item Compute a tridiagonal matrix $T$: $A = P T P^T$.
+\item From $T$ compute a diagonal matrix $D$: $T = Q D Q^T$.
+\item The eigenvalues of $A$ are in the diagonal of $D$.
+\item Compute the eigenvectors from $D$.
+\end{enumerate}
+%
+Computing a tridiagonal matrix is called \textbf{tridiagonalization}. For the 
+diagonal, \textbf{diagonalization}. Several algorithms exists for both steps.
+
+\subsection{Tridiagonalization algorithms}
+
+These algorithms transform a \textbf{symmetric} matrix $A$ into a new pair of 
+matrices $P$ and $T$ such that $P$ is orthogonal, $T$ is tridiagonal, and $A = 
+P T P^T$
+%
+$$
+	\mat{
+		a_{11} & a_{12} & a_{13} & a_{14} \\
+		a_{21} & a_{22} & a_{23} & a_{24} \\
+		a_{31} & a_{32} & a_{33} & a_{34} \\
+		a_{41} & a_{42} & a_{43} & a_{44} \\
+	} =
+	P
+	\mat{
+		t_{11} & t_{12} &        &        \\
+		t_{21} & t_{22} & t_{23} &        \\
+		       & t_{32} & t_{33} & t_{34} \\
+		       &        & t_{43} & t_{44} \\
+	}
+	P^T
+$$
+%
+Some algorithms can be used for this factorization:
+%
+\begin{center}
+\begin{tabular}{c c c c}
+	\toprule
+	Algorithm 		& Complexity  & Iterative & Stability\\
+	\midrule
+	Householder		& $O(4n^3/3)$ & No        & Great\\
+	Givens				& $O(kn^3)$   & No        & Good \\
+	Lanczos				& $O(kpn^2)$  & Yes       & Bad \\
+	Others				&             &          \\
+	\bottomrule
+\end{tabular}
+\end{center}
+%
+Where $n \times n$ is the dimension of the matrix $A$, $k$ is some constant, and 
+$p$ the number of iterations.
+
+\subsection{Diagonalization algorithms}
+
+These algorithms take a \textbf{tridiagonal} matrix $T$ into a new pair of 
+matrices $Q$ and $D$ such that $Q$ is orthogonal, $D$ is diagonal, and $T = Q 
+D Q^T$
+%
+$$
+	\mat{
+		t_{11} & t_{12} &        &        \\
+		t_{21} & t_{22} & t_{23} &        \\
+		       & t_{32} & t_{33} & t_{34} \\
+		       &        & t_{43} & t_{44} \\
+	}=
+	Q
+	\mat{
+		d_{11} &        &        &        \\
+		       & d_{22} &        &        \\
+		       &        & d_{33} &        \\
+		       &        &        & d_{44} \\
+	}
+	Q^T
+$$
+%
+The matrix $D$ contains the \textbf{eigenvalues} in the diagonal. Some 
+algorithms can be used to compute the diagonalization:
+%
+\begin{center}
+\begin{tabular}{c c c c}
+	\toprule
+	Algorithm							& Complexity  & Convergence	\\
+	\midrule
+	QR                  & $O(6n^3)$ 	& Cubic 			\\
+	Divide and conquer  & $O(8n^3/3)$ & Quadratic 	\\
+	Jacobi              & $O(n^3)$    & Quadratic 	\\
+	Power iteration			& $O(n^3)$    & Linear 			\\
+	Inverse iteration	  & $O(n^3)$    & Linear 			\\
+	Others							&             &          		\\
+	\bottomrule
+\end{tabular}
+\end{center}
+%
+% TODO: Verify the complexity of all the algorithms from a good source.
+%
+All these algorithms are iterative and $n \times n$ is the dimension of the 
+matrix~$A$.
 
 
 \end{document}
