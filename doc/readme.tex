@@ -4,6 +4,8 @@
 \usepackage{amsthm}
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{pgfplots}
 
 \usepackage{minted}
 \newminted{py}{%
@@ -215,6 +217,60 @@ algorithms can be used to compute the diagonalization:
 %
 All these algorithms are iterative and $n \times n$ is the dimension of the 
 matrix~$A$.
+
+\section{Reduction of bit-width}
+
+The reduction of bits in the mantisa of the floating points used by the 
+algorithm can lead to an acceleration in the ALU. However, the precision of the 
+results can be affected by the number of bits used.
+
+For this reason, an experiment is designed, to test how the precision is reduced 
+as the number of bits of the mantisa is also reduced.
+
+The library MPFR is designed to perform computations with an arbitrary mantissa 
+length. After rewrite the Householder algorithm, the results can be compared 
+with a golden execution. This golden execution is done with a very big mantissa, 
+such that the error of the result is so low that can be ignored, compared with 
+the errors produced in the experiments.
+
+The experiment is performed as follows: First, a random symmetric matrix $A$ of 
+fixed size $N\times N$ is created. Then, the Householder triangulation is 
+computed very precisely, using $b_g$ bits. Finally, the algorithm is recomputed 
+with different mantissa lengths, from $b_{min}$ to $b_{max}$.
+
+With the parameters $N = 5$, $b_g=500$, $b_{min} = 2$ and $b_{max}=100$, the 
+experiment is repeated 100 times. The difference from the diagonal with reduced 
+precision is compared to the golden result, and the 2-norm is measured. The 
+errors can be seen in the figure~\ref{fig:errhh} as the length of the mantisa 
+grows.
+
+\begin{figure}[h]
+	\begin{tikzpicture}
+		\begin{semilogyaxis}[
+			grid = both,
+			width = \linewidth
+		]
+			\addplot+ [
+				only marks,
+				mark size = 0.5pt
+			] table [
+				x index = {0},
+				y index = {1},
+				col sep = space
+			] {../src/firsthh.csv};
+		\end{semilogyaxis}
+	\end{tikzpicture}
+	%\includegraphics[width=\textwidth]{bighh}
+	\caption{Experiments with Householder on different mantisa lengths.}
+	\label{fig:errhh}
+\end{figure}
+
+The experiments shows that the error is decreased as the precision grows. The 
+data shows a linear relationship between the length of the mantissa and the 
+logarithm of the error.
+
+
+
 
 
 \end{document}
