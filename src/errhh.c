@@ -4,7 +4,7 @@
 #include <mpfr.h>
 #include <stdio.h>
 
-#define N 5
+#define N 10
 #define PREC 24 /* this machine is NOT IEEE 754 compliant */
 #define RND_DIR MPFR_RNDN
 
@@ -116,20 +116,23 @@ void hh(struct mptridiag_t *td)
 
 void errhh(struct mptridiag_t *gold, struct mptridiag_t *target)
 {
-	mpfr_t err, err1;
+	mpfr_t err, err1, norm2_err;
 	hh(target);
-	
+
 	mpfr_init2(err1, gold->prec);
 	mpfr_init2(err, gold->prec);
+	mpfr_init2(norm2_err, gold->prec);
 
 	mpfr_sub(err, gold->diag[1], target->diag[1], gold->rnd);
 	mpfr_abs(err1, err, gold->rnd);
-	
-	//mpvector_diff(err, gold->diag, target->diag, gold->n, gold->prec, gold->rnd);
+
+	mpvector_diff(norm2_err, gold->diag, target->diag, gold->n, gold->prec, gold->rnd);
 
 	//mpfr_printf("errhh:%d bits, error %.20Rg\n", target->prec, err);
-	mpfr_printf("%d\t%.20Rg\t%.20Rg\n", target->prec, err1, err);
+	mpfr_printf("%d\t%.20Rg\t%.20Rg\t%.20Rg\n",
+		target->prec, err1, err, norm2_err);
 
+	mpfr_clear(norm2_err);
 	mpfr_clear(err1);
 	mpfr_clear(err);
 }
@@ -198,7 +201,7 @@ void test_rnd(gmp_randstate_t state)
 		//mpvector_print(target->diag, target->n);
 		mptridiag_free(target);
 	}
-	
+
 	mptridiag_free(gold);
 
 }
