@@ -1,7 +1,7 @@
 dat = read.csv('firsthh.csv', sep='\t', head=FALSE)
 pdf('err.pdf', width=8, height=6)
 #par(mar=c(4,4,0.5,0.5))
-plot(dat[,1], log2(dat[,2]), pch='.', 
+plot(dat[,1], log2(dat[,2]), pch='.',
 	xlab='Bit-width', ylab='log2(err)', main='Error in the result')
 dev.off()
 

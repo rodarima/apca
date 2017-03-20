@@ -1,0 +1,97 @@
+\documentclass[serif, 12pt]{beamer}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+
+\usepackage{color}
+
+%\usepackage{algorithm2e}
+\usepackage{hyperref}
+\usepackage{algorithm,algorithmic}
+\usepackage{changepage}
+
+\newcommand*\mat[1]{ \begin{pmatrix} #1 \end{pmatrix}}
+\newcommand*\arr[1]{ \begin{bmatrix} #1 \end{bmatrix}}
+\newcommand*\V[1]{ \boldsymbol{#1}}
+
+\newcommand*\D{\textcolor{violet}{D}}
+\newcommand*\T{\textcolor{blue}{T}}
+
+\setbeamertemplate{navigation symbols}{}%remove navigation symbols
+
+\setbeamerfont{page number in head/foot}{size=\small}
+\setbeamertemplate{footline}[frame number]
+
+\title{Approximated PCA}
+\subtitle{Iteration 3}
+
+\author{Rodrigo Arias} % Your name
+\date{\today} % Date, can be changed to a custom date
+
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Proposed hypothesis}
+
+Let $\epsilon_b$ be the error in the result with width $b$, then the following 
+hypothesis can be proposed:
+\begin{itemize}
+\item The mean of $\mu = \log_2(\epsilon_b) \approx -b$.
+\item The standard deviation $\approx 2$.
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Mean}
+Let $X = \log_2(\epsilon_b)$ be a random variable with unknown mean $\mu$ and 
+variance $\sigma^2$.  Then, after $k$ runs, the observed mean $\overline x$ 
+follows (CLT):
+%
+$$ \overline X \sim N(\mu,\sigma/\sqrt k)$$
+%
+Or:
+%
+$$ Z = \frac{\overline X - \mu}{\sigma/\sqrt{k}} \sim N(0, 1)$$
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Mean}
+For any $\alpha$, $0 < \alpha < 1$, let $z_\alpha$ be such that $P[Z>z_\alpha] = 
+\alpha$
+
+With probability $1-\alpha$, the mean $\mu$ will lie in the region:
+%
+$$\overline X \pm z_{\alpha/2}S/\sqrt{n}$$
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Plot of the mean}
+
+Let $\epsilon_b$ be the error in the result with width $b$, then the following 
+hypothesis can be proposed:
+\begin{itemize}
+\item The mean of $\log_2(\epsilon_b) \approx -b$.
+\item The standard deviation $\approx 2$.
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+
+\end{document}

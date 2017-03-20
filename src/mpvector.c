@@ -5,15 +5,15 @@
 #include <stdio.h>
 #include "err.h"
 
-struct mptridiag_t *mptridiag_init(int n, mpfr_prec_t prec, mpfr_rnd_t rnd)
+struct mptridiag_t *mptridiag_init(int n, mpfr_prec_t *prec, mpfr_rnd_t rnd)
 {
 	struct mptridiag_t *td = malloc(sizeof(*td));
 	if(!td) erhand("Allocation failure in mptridiag_init().");
-	td->A = mpmatrix_init(n, n, prec);
-	td->diag = mpvector_init(n, prec);
-	td->offdiag = mpvector_init(n, prec);
+	td->A = mpmatrix_init(n, n, prec[0]);
+	td->diag = mpvector_init(n, prec[1]);
+	td->offdiag = mpvector_init(n, prec[2]);
 	td->n = n;
-	td->prec = prec;
+	td->prec = prec[0];
 	td->rnd = rnd;
 
 	return td;

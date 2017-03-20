@@ -1,0 +1,16 @@
+2017M10
+
+Despues de realizar 10000 simulaciones, cada una de ella produciendo 99
+mediciones del error (de 2 a 100 bits comparados con 500 bits), se obtuvieron
+los resultados:
+
+	exp1.csv
+
+En dicho dataset, se encuentran 4 columnas separadas por tabuladores.
+
+	2	0.0304	-0.0304	0.321
+
+La primera es el número de bits de mantisa. La segunda es el error absoluto en
+el primer elemento de la diagonal. La tercera es el error con signo. La cuarta
+contiene la norma 2 del error en la diagonal.
+

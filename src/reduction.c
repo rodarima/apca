@@ -14,7 +14,7 @@
 
 /**  Reduce a real, symmetric matrix to a symmetric, tridiag. matrix. */
 
-void mp_tred2(mpfr_t **a, int n, mpfr_t *d, mpfr_t *e, mpfr_prec_t prec, mpfr_rnd_t rnd)
+void mp_tred2(mpfr_t **a, int n, mpfr_t *d, mpfr_t *e, mpfr_prec_t *prec, mpfr_rnd_t rnd)
 /* Householder reduction of matrix a to tridiagonal form.
    Algorithm: Martin et al., Num. Math. 11, 181-195, 1968.
    Ref: Smith et al., Matrix Eigensystem Routines -- EISPACK Guide
@@ -25,12 +25,12 @@ void mp_tred2(mpfr_t **a, int n, mpfr_t *d, mpfr_t *e, mpfr_prec_t prec, mpfr_rn
 	int l, k, j, i;
 	mpfr_t scale, hh, h, g, f, tmp1;
 
-	mpfr_init2(scale, prec);
-	mpfr_init2(hh, prec);
-	mpfr_init2(h, prec);
-	mpfr_init2(g, prec);
-	mpfr_init2(f, prec);
-	mpfr_init2(tmp1, prec);
+	mpfr_init2(scale, prec[3]);
+	mpfr_init2(hh, prec[4]);
+	mpfr_init2(h, prec[5]);
+	mpfr_init2(g, prec[6]);
+	mpfr_init2(f, prec[7]);
+	mpfr_init2(tmp1, prec[8]);
 
 	for (i = n; i >= 2; i--)
 	{
@@ -44,7 +44,7 @@ void mp_tred2(mpfr_t **a, int n, mpfr_t *d, mpfr_t *e, mpfr_prec_t prec, mpfr_rn
 				mpfr_abs(tmp1, a[i][k], rnd);
 				mpfr_add(scale, scale, tmp1, rnd);
 				//scale += fabs(a[i][k]);
-			//mpfr_printf("scale = %Rf\n", scale);
+			mpfr_fprintf(stderr, "scale = %Rf\n", scale);
 			if (mpfr_zero_p(scale))
 			//if (scale == 0.0)
 				mpfr_set(e[i], a[i][l], rnd);

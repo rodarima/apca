@@ -13,7 +13,7 @@ struct mptridiag_t
 	mpfr_rnd_t rnd;
 };
 
-struct mptridiag_t *mptridiag_init(int n, mpfr_prec_t prec, mpfr_rnd_t rnd);
+struct mptridiag_t *mptridiag_init(int n, mpfr_prec_t *prec, mpfr_rnd_t rnd);
 void mptridiag_free(struct mptridiag_t *td);
 
 /**  Allocation of vector storage  ***********************************/
