@@ -5,26 +5,11 @@
 #include <stdio.h>
 
 #define N 5
-#define PREC 24 /* this machine is NOT IEEE 754 compliant */
 
-struct rnd_t
-{
-	mpfr_rnd_t rnd;
-	char *rnd_str;
-};
-
-#define N_RND_MODES 5
-struct rnd_t rnd_modes[N_RND_MODES] = {
-	{MPFR_RNDN, "N"},
-	{MPFR_RNDZ, "Z"},
-	{MPFR_RNDU, "U"},
-	{MPFR_RNDD, "D"},
-	{MPFR_RNDA, "A"},
-};
-
-void test(mpfr_prec_t prec, mpfr_rnd_t rnd, char *rnd_str)
+void test(mpfr_prec_t prec, mpfr_rnd_t rnd)
 {
 	mpfr_t **A, *diag, *offdiag, err, tmp1;
+	mpfr_prec_t prec_vec[20];
 	float **_A, *_diag, *_offdiag;
 	int i, j;
 
@@ -36,45 +21,61 @@ void test(mpfr_prec_t prec, mpfr_rnd_t rnd, char *rnd_str)
 		{1,3,5,7,9},
 	};
 
+	for(i = 0; i<20; i++)
+		prec_vec[i] = prec;
+
+	mpfr_init2(tmp1, prec);
+	mpfr_init2(err, prec);
+
 	A = mpmatrix_init(N, N, prec);
 	diag = mpvector_init(N, prec);
 	offdiag = mpvector_init(N, prec);
-	mpfr_init2(tmp1, prec);
-	mpfr_init2(err, prec);
 
 	_A = matrix_init(N, N);
 	_diag = vector_init(N);
 	_offdiag = vector_init(N);
 
 	for(i=1; i<=N; i++)
+	{
 		for(j=1; j<=N; j++)
 		{
 			mpfr_set_flt(A[i][j], AA[i-1][j-1], rnd);
 			_A[i][j] = AA[i-1][j-1];
 		}
+	}
 
-//	printf("-------- MPFR precision (%d bits) ----------\n", prec);
-//	printf("Matrix A:\n");
-//	mpmatrix_print(A, N, N);
-
-	mp_tred2(A, N, diag, offdiag, prec, rnd);
-
-//	printf("\nDiagonal:\n");
-//	mpvector_print(diag, N);
-//	printf("\nOffdiagonal:\n");
-//	mpvector_print(offdiag, N);
-//
-//	printf("\n-------- Float precision ---------\n");
+	printf("\n-------- Float precision ---------\n");
 //	
 //	printf("\nMatrix _A:\n");
 //	matrix_print(_A, N, N);
 
 	tred2(_A, N, _diag, _offdiag);
 
-//	printf("\nDiagonal:\n");
-//	vector_print(_diag, N);
-//	printf("\nOffdiagonal:\n");
-//	vector_print(_offdiag, N);
+	printf("\nDiagonal:\n");
+	vector_print(_diag, N);
+	printf("\nOffdiagonal:\n");
+	vector_print(_offdiag, N);
+
+	tqli(_diag, _offdiag, N, _A);
+
+	printf("\nEigenvalues:\n");
+	vector_print(_diag, N);
+
+	printf("-------- MPFR precision (%d bits) ----------\n", prec);
+//	printf("Matrix A:\n");
+//	mpmatrix_print(A, N, N);
+
+	mp_tred2(A, N, diag, offdiag, prec_vec, rnd);
+
+	printf("\nDiagonal:\n");
+	mpvector_print(diag, N);
+	printf("\nOffdiagonal:\n");
+	mpvector_print(offdiag, N);
+//
+	mp_tqli(diag, offdiag, N, A, prec_vec, rnd);
+
+	printf("\nEigenvalues:\n");
+	mpvector_print(diag, N);
 
 	//printf("\n-------- Differences ---------\n");
 	mpfr_set_flt(err, 0.0, rnd);
@@ -88,7 +89,7 @@ void test(mpfr_prec_t prec, mpfr_rnd_t rnd, char *rnd_str)
 	}
 	mpfr_sqrt(err, err, rnd);
 	//mpfr_printf("\n");
-	mpfr_printf("%3d bits, error %.15Rg %s\n", prec, err, rnd_str);
+	mpfr_printf("%3d bits, error %.15Rg\n", prec, err);
 
 	mpfr_clear(tmp1);
 	mpfr_clear(err);
@@ -103,13 +104,19 @@ void test(mpfr_prec_t prec, mpfr_rnd_t rnd, char *rnd_str)
 
 }
 
+#define PREC_MIN 24
+#define PREC_MAX 100
+#define PREC_GOLD 500
+#define RND_MODE MPFR_RNDN
+
 int main()
 {
-	int i, j;
+	mpfr_prec_t b;
 
-	for(j = 15; j <= 30; j++)
-		for(i = 0; i < N_RND_MODES; i++)
-			test(j, rnd_modes[i].rnd, rnd_modes[i].rnd_str);
+	for(b = PREC_MIN; b <= PREC_MAX; b+=10)
+	{
+		test(b, RND_MODE);
+	}
 
 	return 0;
 }

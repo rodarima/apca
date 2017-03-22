@@ -44,7 +44,7 @@ void mp_tred2(mpfr_t **a, int n, mpfr_t *d, mpfr_t *e, mpfr_prec_t *prec, mpfr_r
 				mpfr_abs(tmp1, a[i][k], rnd);
 				mpfr_add(scale, scale, tmp1, rnd);
 				//scale += fabs(a[i][k]);
-			mpfr_fprintf(stderr, "scale = %Rf\n", scale);
+			//mpfr_fprintf(stderr, "scale = %Rf\n", scale);
 			if (mpfr_zero_p(scale))
 			//if (scale == 0.0)
 				mpfr_set(e[i], a[i][l], rnd);
@@ -255,7 +255,200 @@ int n;
 }
 
 /**  Tridiagonal QL algorithm -- Implicit  **********************/
-#if 0
+//void tqli(float d[], float e[], int n, float **z)
+void mp_tqli(mpfr_t *d, mpfr_t *e, int n, mpfr_t **z, mpfr_prec_t *prec, mpfr_rnd_t rnd)
+{
+	int m, l, iter, i, k;
+	//float s, r, p, g, f, dd, c, b;
+	mpfr_t s, r, p, g, f, dd, c, b, tmp1, tmp2;
+	//void erhand();
+
+	mpfr_init2(s, prec[3]);
+	mpfr_init2(r, prec[4]);
+	mpfr_init2(p, prec[5]);
+	mpfr_init2(g, prec[6]);
+	mpfr_init2(f, prec[7]);
+	mpfr_init2(dd, prec[8]);
+	mpfr_init2(c, prec[9]);
+	mpfr_init2(b, prec[10]);
+	mpfr_init2(tmp1, prec[11]);
+	mpfr_init2(tmp2, prec[12]);
+
+	for (i = 2; i <= n; i++)
+	{
+		//e[i-1] = e[i];
+		mpfr_set(e[i-1], e[i], rnd);
+	}
+	//e[n] = 0.0;
+	mpfr_set_d(e[n], 0.0, rnd);
+
+	for (l = 1; l <= n; l++)
+	{
+		iter = 0;
+		do
+		{
+			for (m = l; m <= n-1; m++)
+			{
+				//dd = fabs(d[m]) + fabs(d[m+1]);
+				mpfr_abs(dd, d[m], rnd);
+				mpfr_abs(tmp1, d[m+1], rnd);
+				mpfr_add(dd, dd, tmp1, rnd);
+
+				//if (fabs(e[m]) + dd == dd) break;
+				mpfr_abs(tmp1, e[m], rnd);
+				mpfr_add(tmp1, tmp1, dd, rnd);
+				if(mpfr_equal_p(tmp1, dd)) break;
+			}
+			mpfr_printf("dd = %Re\n", dd);
+			if (m != l)
+			{
+				if (iter++ == 30)
+				{
+					fprintf(stderr, "No convergence in mp TLQI.");
+					exit(-1);
+				}
+
+				//g = (d[l+1] - d[l]) / (2.0 * e[l]);
+				mpfr_sub(tmp1, d[l+1], d[l], rnd);
+				mpfr_div(tmp1, tmp1, e[l], rnd);
+				mpfr_div_d(g, tmp1, 2.0, rnd);
+
+				//r = sqrt((g * g) + 1.0);
+				mpfr_mul(tmp1, g, g, rnd);
+				mpfr_add_d(tmp1, tmp1, 1.0, rnd);
+				mpfr_sqrt(r, tmp1, rnd);
+
+				mpfr_printf("r = %Re\n", r);
+
+				//#define SIGN(a, b) ( (b) < 0 ? -fabs(a) : fabs(a) )
+				//g = d[m] - d[l] + (e[l] / (g + SIGN(r, g)));
+				mpfr_abs(tmp1, r, rnd);
+				if (mpfr_sgn(g) < 0)
+				{
+					mpfr_neg(tmp1, tmp1, rnd);
+				}
+				mpfr_add(tmp1, g, tmp1, rnd);
+				mpfr_div(tmp1, e[l], tmp1, rnd);
+				mpfr_add(tmp1, tmp1, d[m], rnd);
+				mpfr_sub(g, tmp1, d[l], rnd);
+
+				mpfr_printf("g = %Re\n", g);
+
+
+				//s = c = 1.0;
+				mpfr_set_d(s, 1.0, rnd);
+				mpfr_set_d(c, 1.0, rnd);
+
+				//p = 0.0;
+				mpfr_set_d(p, 0.0, rnd);
+
+				for (i = m-1; i >= l; i--)
+				{
+					//f = s * e[i];
+					mpfr_mul(f, s, e[i], rnd);
+
+					//b = c * e[i];
+					mpfr_mul(b, c, e[i], rnd);
+
+					//if (fabs(f) >= fabs(g))
+					mpfr_abs(tmp1, f, rnd);
+					mpfr_abs(tmp2, g, rnd);
+					if(mpfr_greaterequal_p(tmp1, tmp2))
+					{
+						//c = g / f;
+						mpfr_div(c, g, f, rnd);
+
+						//r = sqrt((c * c) + 1.0);
+						mpfr_mul(tmp1, c, c, rnd);
+						mpfr_add_d(tmp1, tmp1, 1.0, rnd);
+						mpfr_sqrt(r, tmp1, rnd);
+
+						//e[i+1] = f * r;
+						mpfr_mul(e[i+1], f, r, rnd);
+
+						//c *= (s = 1.0/r);
+						mpfr_set_d(tmp1, 1.0, rnd);
+						mpfr_div(s, tmp1, r, rnd);
+						mpfr_mul(c, c, s, rnd);
+					}
+					else
+					{
+						//s = f / g;
+						mpfr_div(s, f, g, rnd);
+
+						//r = sqrt((s * s) + 1.0);
+						mpfr_mul(tmp1, s, s, rnd);
+						mpfr_add_d(tmp1, tmp1, 1.0, rnd);
+						mpfr_sqrt(r, tmp1, rnd);
+
+						//e[i+1] = g * r;
+						mpfr_mul(e[i+1], g, r, rnd);
+
+						//s *= (c = 1.0/r);
+						mpfr_set_d(tmp1, 1.0, rnd);
+						mpfr_div(c, tmp1, r, rnd);
+						mpfr_mul(s, s, c, rnd);
+					}
+					//g = d[i+1] - p;
+					mpfr_sub(g, d[i+1], p, rnd);
+
+					//r = (d[i] - g) * s + 2.0 * c * b;
+					mpfr_sub(tmp1, d[i], g, rnd);
+					mpfr_mul(r, tmp1, s, rnd);
+					mpfr_mul(tmp1, c, b, rnd);
+					mpfr_mul_d(tmp1, tmp1, 2.0, rnd);
+					mpfr_add(r, r, tmp1, rnd);
+
+					//p = s * r;
+					mpfr_mul(p, s, r, rnd);
+
+					//d[i+1] = g + p;
+					mpfr_add(d[i+1], g, p, rnd);
+
+					//g = c * r - b;
+					mpfr_fms(g, c, r, b, rnd);
+
+					for (k = 1; k <= n; k++)
+					{
+						//f = z[k][i+1];
+						mpfr_set(f, z[k][i+1], rnd);
+
+						//z[k][i+1] = s * z[k][i] + c * f;
+						mpfr_mul(tmp1, c, f, rnd);
+						mpfr_fma(z[k][i+1], s, z[k][i], tmp1, rnd);
+
+						//z[k][i] = c * z[k][i] - s * f;
+						mpfr_mul(tmp1, s, f, rnd);
+						mpfr_fms(z[k][i], c, z[k][i], tmp1, rnd);
+					}
+				}
+
+				//d[l] = d[l] - p;
+				mpfr_sub(d[l], d[l], p, rnd);
+
+				//e[l] = g;
+				mpfr_set(e[l], g, rnd);
+
+				//e[m] = 0.0;
+				mpfr_set_d(e[m], 0.0, rnd);
+			}
+			mpfr_printf("mpTLQI: Iteration %d, g=%Re, m=%d, l=%d\n", iter, g, m, l);
+		}
+		while (m != l);
+	}
+
+	mpfr_clear(s);
+	mpfr_clear(r);
+	mpfr_clear(p);
+	mpfr_clear(g);
+	mpfr_clear(f);
+	mpfr_clear(dd);
+	mpfr_clear(c);
+	mpfr_clear(b);
+	mpfr_clear(tmp1);
+	mpfr_clear(tmp2);
+}
+
 void tqli(d, e, n, z)
 	float d[], e[], **z;
 	int n;
@@ -277,12 +470,15 @@ void tqli(d, e, n, z)
 				dd = fabs(d[m]) + fabs(d[m+1]);
 				if (fabs(e[m]) + dd == dd) break;
 			}
+			printf("dd = %e\n", dd);
 			if (m != l)
 			{
 				if (iter++ == 30) erhand("No convergence in TLQI.");
 				g = (d[l+1] - d[l]) / (2.0 * e[l]);
 				r = sqrt((g * g) + 1.0);
+				printf("r = %e\n", r);
 				g = d[m] - d[l] + e[l] / (g + SIGN(r, g));
+				printf("g = %e\n", g);
 				s = c = 1.0;
 				p = 0.0;
 				for (i = m-1; i >= l; i--)
@@ -319,12 +515,12 @@ void tqli(d, e, n, z)
 				e[l] = g;
 				e[m] = 0.0;
 			}
-			//printf("TLQI: Iteration %d, g=%f, m=%d, l=%d\n", iter, g, m, l);
+			printf("TLQI: Iteration %d, g=%e, m=%d, l=%d\n", iter, g, m, l);
 		}
 		while (m != l);
 	}
 }
-#endif
+
 //***************************************************************************
 //    3.0    3.0    3.0    3.0    3.0    3.0   35.0   45.0
 //   53.0   55.0   58.0  113.0  113.0   86.0   67.0   90.0

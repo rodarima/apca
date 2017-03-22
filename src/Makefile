@@ -4,11 +4,13 @@ LDFLAGS=-lm -lmpfr -lgmp
 
 all: error big test precision
 
-test: test_mpvector test_householder
+test: test_mpvector test_householder test_ql
 
 test_mpvector: err.o mpvector.o
 
 test_householder: err.o mpvector.o reduction.o
+
+test_ql: err.o mpvector.o reduction.o
 
 mpvector.o: err.o
 
