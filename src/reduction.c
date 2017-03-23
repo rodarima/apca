@@ -256,23 +256,23 @@ int n;
 
 /**  Tridiagonal QL algorithm -- Implicit  **********************/
 //void tqli(float d[], float e[], int n, float **z)
-void mp_tqli(mpfr_t *d, mpfr_t *e, int n, mpfr_t **z, mpfr_prec_t *prec, mpfr_rnd_t rnd)
+void mp_tqli(mpfr_t *d, mpfr_t *e, int n, mpfr_t **z, mpfr_prec_t prec[10], mpfr_rnd_t rnd)
 {
 	int m, l, iter, i, k;
 	//float s, r, p, g, f, dd, c, b;
 	mpfr_t s, r, p, g, f, dd, c, b, tmp1, tmp2;
 	//void erhand();
 
-	mpfr_init2(s, prec[3]);
-	mpfr_init2(r, prec[4]);
-	mpfr_init2(p, prec[5]);
-	mpfr_init2(g, prec[6]);
-	mpfr_init2(f, prec[7]);
-	mpfr_init2(dd, prec[8]);
-	mpfr_init2(c, prec[9]);
-	mpfr_init2(b, prec[10]);
-	mpfr_init2(tmp1, prec[11]);
-	mpfr_init2(tmp2, prec[12]);
+	mpfr_init2(s,    prec[0]);
+	mpfr_init2(r,    prec[1]);
+	mpfr_init2(p,    prec[2]);
+	mpfr_init2(g,    prec[3]);
+	mpfr_init2(f,    prec[4]);
+	mpfr_init2(dd,   prec[5]);
+	mpfr_init2(c,    prec[6]);
+	mpfr_init2(b,    prec[7]);
+	mpfr_init2(tmp1, prec[8]);
+	mpfr_init2(tmp2, prec[9]);
 
 	for (i = 2; i <= n; i++)
 	{
@@ -299,7 +299,7 @@ void mp_tqli(mpfr_t *d, mpfr_t *e, int n, mpfr_t **z, mpfr_prec_t *prec, mpfr_rn
 				mpfr_add(tmp1, tmp1, dd, rnd);
 				if(mpfr_equal_p(tmp1, dd)) break;
 			}
-			//mpfr_printf("dd = %Re\n", dd);
+			//mpfr_printf("dd = %.10Rf\n", dd);
 			if (m != l)
 			{
 				if (iter++ == 30)
@@ -318,7 +318,7 @@ void mp_tqli(mpfr_t *d, mpfr_t *e, int n, mpfr_t **z, mpfr_prec_t *prec, mpfr_rn
 				mpfr_add_d(tmp1, tmp1, 1.0, rnd);
 				mpfr_sqrt(r, tmp1, rnd);
 
-				//mpfr_printf("r = %Re\n", r);
+				//mpfr_printf("r = %.10Rf\n", r);
 
 				//#define SIGN(a, b) ( (b) < 0 ? -fabs(a) : fabs(a) )
 				//g = d[m] - d[l] + (e[l] / (g + SIGN(r, g)));
@@ -332,7 +332,7 @@ void mp_tqli(mpfr_t *d, mpfr_t *e, int n, mpfr_t **z, mpfr_prec_t *prec, mpfr_rn
 				mpfr_add(tmp1, tmp1, d[m], rnd);
 				mpfr_sub(g, tmp1, d[l], rnd);
 
-				//mpfr_printf("g = %Re\n", g);
+				//mpfr_printf("g = %.10Rf\n", g);
 
 
 				//s = c = 1.0;
@@ -432,7 +432,7 @@ void mp_tqli(mpfr_t *d, mpfr_t *e, int n, mpfr_t **z, mpfr_prec_t *prec, mpfr_rn
 				//e[m] = 0.0;
 				mpfr_set_d(e[m], 0.0, rnd);
 			}
-			//mpfr_printf("mpTLQI: Iteration %d, g=%Re, m=%d, l=%d\n", iter, g, m, l);
+			//mpfr_printf("mpTLQI: Iteration %d, g=%.10Rf, m=%d, l=%d\n", iter, g, m, l);
 		}
 		while (m != l);
 	}

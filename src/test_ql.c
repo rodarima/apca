@@ -4,7 +4,7 @@
 #include <mpfr.h>
 #include <stdio.h>
 
-#define N 5
+#define N 10
 
 void test(mpfr_prec_t prec, mpfr_rnd_t rnd)
 {
@@ -111,7 +111,7 @@ void test(mpfr_prec_t prec, mpfr_rnd_t rnd)
 
 }
 
-#define PREC_MIN 24
+#define PREC_MIN 64
 #define PREC_MAX 100
 #define PREC_GOLD 500
 #define RND_MODE MPFR_RNDN

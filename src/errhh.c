@@ -114,24 +114,37 @@ void hh(struct mptridiag_t *td, mpfr_prec_t *prec)
 	mp_tred2(td->A, td->n, td->diag, td->offdiag, prec, td->rnd);
 }
 
+void ql(struct mptridiag_t *td, mpfr_prec_t *prec)
+{
+	//int i;
+	//for(i=9; i < 19; i++)
+	//	printf("prec[%d]=%d\n", i, prec[i]);
+	mp_tqli(td->diag, td->offdiag, td->n, td->A, &(prec[9]), td->rnd);
+}
+
 void errhh(struct mptridiag_t *gold, struct mptridiag_t *target, mpfr_prec_t *prec, int var)
 {
-	mpfr_t err, err1, norm2_err;
+	mpfr_t err, err1, norm2_err, cond;
 	hh(target, prec);
 
 	mpfr_init2(err1, gold->prec);
 	mpfr_init2(err, gold->prec);
 	mpfr_init2(norm2_err, gold->prec);
+	mpfr_init2(cond, gold->prec);
 
 	mpfr_sub(err, gold->diag[1], target->diag[1], gold->rnd);
 	mpfr_abs(err1, err, gold->rnd);
 
 	mpvector_diff(norm2_err, gold->diag, target->diag, gold->n, gold->prec, gold->rnd);
 
-	//mpfr_printf("errhh:%d bits, error %.20Rg\n", target->prec, err);
-	mpfr_printf("%d\t%d\t%.20Rg\t%.20Rg\t%.20Rg\n",
-		prec[var], var, err1, err, norm2_err);
+	ql(target, prec); //XXX gold prec?
+	mp_eigcond(cond, target->diag, target->n, gold->prec, gold->rnd);
 
+	//mpfr_printf("errhh:%d bits, error %.20Rg\n", target->prec, err);
+	mpfr_printf("%d\t%d\t%.20Rg\t%.20Rg\t%.20Rg\t%.10Rg\n",
+		prec[var], var, err1, err, norm2_err, cond);
+
+	mpfr_clear(cond);
 	mpfr_clear(norm2_err);
 	mpfr_clear(err1);
 	mpfr_clear(err);
@@ -184,9 +197,9 @@ void test_rnd(gmp_randstate_t state)
 	int i, j, n = N;
 	struct mptridiag_t *gold, *target, *ref;
 	mpfr_prec_t prec_set[SIZE_PREC_SET] = {4, 8, 12, 16, 20, 24, 32, 48, 52, 64};
-	mpfr_prec_t prec_conf[SIZE_CONF_VAR];
+	mpfr_prec_t prec_conf[SIZE_CONF_VAR+50];
 
-	for(i = 0; i < SIZE_CONF_VAR; i++)
+	for(i = 0; i < (SIZE_CONF_VAR + 50); i++)
 		prec_conf[i] = GOLD_PREC;
 
 	gold = mptridiag_init(n, prec_conf, RND_DIR);
