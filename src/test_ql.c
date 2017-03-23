@@ -60,6 +60,8 @@ void test(mpfr_prec_t prec, mpfr_rnd_t rnd)
 
 	printf("\nEigenvalues:\n");
 	vector_print(_diag, N);
+//	printf("\nMatrix _A:\n");
+//	matrix_print(_A, N, N);
 
 	printf("-------- MPFR precision (%d bits) ----------\n", prec);
 //	printf("Matrix A:\n");
@@ -76,6 +78,11 @@ void test(mpfr_prec_t prec, mpfr_rnd_t rnd)
 
 	printf("\nEigenvalues:\n");
 	mpvector_print(diag, N);
+//	printf("Matrix A:\n");
+//	mpmatrix_print(A, N, N);
+
+	mp_eigcond(tmp1, diag, N, prec, rnd);
+	mpfr_printf("Condition number: %Re\n", tmp1);
 
 	//printf("\n-------- Differences ---------\n");
 	mpfr_set_flt(err, 0.0, rnd);

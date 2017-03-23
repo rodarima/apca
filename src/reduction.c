@@ -299,7 +299,7 @@ void mp_tqli(mpfr_t *d, mpfr_t *e, int n, mpfr_t **z, mpfr_prec_t *prec, mpfr_rn
 				mpfr_add(tmp1, tmp1, dd, rnd);
 				if(mpfr_equal_p(tmp1, dd)) break;
 			}
-			mpfr_printf("dd = %Re\n", dd);
+			//mpfr_printf("dd = %Re\n", dd);
 			if (m != l)
 			{
 				if (iter++ == 30)
@@ -318,7 +318,7 @@ void mp_tqli(mpfr_t *d, mpfr_t *e, int n, mpfr_t **z, mpfr_prec_t *prec, mpfr_rn
 				mpfr_add_d(tmp1, tmp1, 1.0, rnd);
 				mpfr_sqrt(r, tmp1, rnd);
 
-				mpfr_printf("r = %Re\n", r);
+				//mpfr_printf("r = %Re\n", r);
 
 				//#define SIGN(a, b) ( (b) < 0 ? -fabs(a) : fabs(a) )
 				//g = d[m] - d[l] + (e[l] / (g + SIGN(r, g)));
@@ -332,7 +332,7 @@ void mp_tqli(mpfr_t *d, mpfr_t *e, int n, mpfr_t **z, mpfr_prec_t *prec, mpfr_rn
 				mpfr_add(tmp1, tmp1, d[m], rnd);
 				mpfr_sub(g, tmp1, d[l], rnd);
 
-				mpfr_printf("g = %Re\n", g);
+				//mpfr_printf("g = %Re\n", g);
 
 
 				//s = c = 1.0;
@@ -432,7 +432,7 @@ void mp_tqli(mpfr_t *d, mpfr_t *e, int n, mpfr_t **z, mpfr_prec_t *prec, mpfr_rn
 				//e[m] = 0.0;
 				mpfr_set_d(e[m], 0.0, rnd);
 			}
-			mpfr_printf("mpTLQI: Iteration %d, g=%Re, m=%d, l=%d\n", iter, g, m, l);
+			//mpfr_printf("mpTLQI: Iteration %d, g=%Re, m=%d, l=%d\n", iter, g, m, l);
 		}
 		while (m != l);
 	}
@@ -470,15 +470,15 @@ void tqli(d, e, n, z)
 				dd = fabs(d[m]) + fabs(d[m+1]);
 				if (fabs(e[m]) + dd == dd) break;
 			}
-			printf("dd = %e\n", dd);
+			//printf("dd = %e\n", dd);
 			if (m != l)
 			{
 				if (iter++ == 30) erhand("No convergence in TLQI.");
 				g = (d[l+1] - d[l]) / (2.0 * e[l]);
 				r = sqrt((g * g) + 1.0);
-				printf("r = %e\n", r);
+				//printf("r = %e\n", r);
 				g = d[m] - d[l] + e[l] / (g + SIGN(r, g));
-				printf("g = %e\n", g);
+				//printf("g = %e\n", g);
 				s = c = 1.0;
 				p = 0.0;
 				for (i = m-1; i >= l; i--)
@@ -515,12 +515,24 @@ void tqli(d, e, n, z)
 				e[l] = g;
 				e[m] = 0.0;
 			}
-			printf("TLQI: Iteration %d, g=%e, m=%d, l=%d\n", iter, g, m, l);
+			//printf("TLQI: Iteration %d, g=%e, m=%d, l=%d\n", iter, g, m, l);
 		}
 		while (m != l);
 	}
 }
 
+/* Compute the condition number from the eigenvalues.
+ * The eigenvalues should be sorted starting at the lowest. */
+void mp_eigcond(mpfr_t c, mpfr_t *ev, int n, mpfr_prec_t prec, mpfr_rnd_t rnd)
+{
+	mpfr_t *low, *big;
+
+	low = &ev[1];
+	big = &ev[n];
+
+	mpfr_div(c, *big, *low, rnd);
+	mpfr_abs(c, c, rnd);
+}
 //***************************************************************************
 //    3.0    3.0    3.0    3.0    3.0    3.0   35.0   45.0
 //   53.0   55.0   58.0  113.0  113.0   86.0   67.0   90.0
