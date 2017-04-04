@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "err.h"
 
-struct mptridiag_t *mptridiag_init(int n, mpfr_prec_t *prec, mpfr_rnd_t rnd)
+struct mptridiag_t *mptridiag_init(int n, mpfr_prec_t prec[3], mpfr_rnd_t rnd)
 {
 	struct mptridiag_t *td = malloc(sizeof(*td));
 	if(!td) erhand("Allocation failure in mptridiag_init().");
@@ -53,7 +53,7 @@ void mpvector_diff(mpfr_t err, mpfr_t *a, mpfr_t *b, int n, mpfr_prec_t prec, mp
 	mpfr_t tmp1;
 
 	mpfr_init2(tmp1, prec);
-	
+
 	mpfr_set_d(err, 0.0, rnd);
 
 	for(i = 1; i<=n; i++)
@@ -63,6 +63,25 @@ void mpvector_diff(mpfr_t err, mpfr_t *a, mpfr_t *b, int n, mpfr_prec_t prec, mp
 		mpfr_add(err, err, tmp1, rnd);
 	}
 	mpfr_sqrt(err, err, rnd);
+
+	mpfr_clear(tmp1);
+}
+
+void mpvector_norm2(mpfr_t res, mpfr_t *a, int n, mpfr_prec_t prec, mpfr_rnd_t rnd)
+{
+	int i;
+	mpfr_t tmp1;
+
+	mpfr_init2(tmp1, prec);
+
+	mpfr_set_d(res, 0.0, rnd);
+
+	for(i = 1; i<=n; i++)
+	{
+		mpfr_mul(tmp1, a[i], a[i], rnd);
+		mpfr_add(res, res, tmp1, rnd);
+	}
+	mpfr_sqrt(res, res, rnd);
 
 	mpfr_clear(tmp1);
 }

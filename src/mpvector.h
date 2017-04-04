@@ -13,7 +13,11 @@ struct mptridiag_t
 	mpfr_rnd_t rnd;
 };
 
-struct mptridiag_t *mptridiag_init(int n, mpfr_prec_t *prec, mpfr_rnd_t rnd);
+#define VARS_MPTRIDIAG 3
+
+struct mptridiag_t *mptridiag_init(
+	int n, mpfr_prec_t prec[VARS_MPTRIDIAG], mpfr_rnd_t rnd);
+
 void mptridiag_free(struct mptridiag_t *td);
 
 /**  Allocation of vector storage  ***********************************/
@@ -22,6 +26,7 @@ void mptridiag_free(struct mptridiag_t *td);
 mpfr_t *mpvector_init(int n, mpfr_prec_t prec);
 
 void mpvector_diff(mpfr_t err, mpfr_t *a, mpfr_t *b, int n, mpfr_prec_t prec, mpfr_rnd_t rnd);
+void mpvector_norm2(mpfr_t res, mpfr_t *a, int n, mpfr_prec_t prec, mpfr_rnd_t rnd);
 
 /* Allocate a float matrix with range [1..n][1..m]. */
 mpfr_t **mpmatrix_init(int n, int m, mpfr_prec_t prec);

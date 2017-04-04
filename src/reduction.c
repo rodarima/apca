@@ -1,4 +1,4 @@
-#include "pca.h"
+#include "reduction.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -14,7 +14,9 @@
 
 /**  Reduce a real, symmetric matrix to a symmetric, tridiag. matrix. */
 
-void mp_tred2(mpfr_t **a, int n, mpfr_t *d, mpfr_t *e, mpfr_prec_t *prec, mpfr_rnd_t rnd)
+void mp_tred2(
+	mpfr_t **a, int n, mpfr_t *d, mpfr_t *e,
+	mpfr_prec_t prec[VARS_TRED2], mpfr_rnd_t rnd)
 /* Householder reduction of matrix a to tridiagonal form.
    Algorithm: Martin et al., Num. Math. 11, 181-195, 1968.
    Ref: Smith et al., Matrix Eigensystem Routines -- EISPACK Guide
@@ -25,12 +27,12 @@ void mp_tred2(mpfr_t **a, int n, mpfr_t *d, mpfr_t *e, mpfr_prec_t *prec, mpfr_r
 	int l, k, j, i;
 	mpfr_t scale, hh, h, g, f, tmp1;
 
-	mpfr_init2(scale, prec[3]);
-	mpfr_init2(hh, prec[4]);
-	mpfr_init2(h, prec[5]);
-	mpfr_init2(g, prec[6]);
-	mpfr_init2(f, prec[7]);
-	mpfr_init2(tmp1, prec[8]);
+	mpfr_init2(scale, prec[0]);
+	mpfr_init2(hh, prec[1]);
+	mpfr_init2(h, prec[2]);
+	mpfr_init2(g, prec[3]);
+	mpfr_init2(f, prec[4]);
+	mpfr_init2(tmp1, prec[5]);
 
 	for (i = n; i >= 2; i--)
 	{
@@ -256,7 +258,9 @@ int n;
 
 /**  Tridiagonal QL algorithm -- Implicit  **********************/
 //void tqli(float d[], float e[], int n, float **z)
-void mp_tqli(mpfr_t *d, mpfr_t *e, int n, mpfr_t **z, mpfr_prec_t prec[10], mpfr_rnd_t rnd)
+void mp_tqli(
+	mpfr_t *d, mpfr_t *e, int n, mpfr_t **z,
+	mpfr_prec_t prec[10], mpfr_rnd_t rnd)
 {
 	int m, l, iter, i, k;
 	//float s, r, p, g, f, dd, c, b;
