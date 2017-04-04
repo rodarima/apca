@@ -9,3 +9,8 @@ test2
 test_householder
 test_mpvector
 bighh.csv
+*.aux
+*.log
+*.nav
+*.snm
+
