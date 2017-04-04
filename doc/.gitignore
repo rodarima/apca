@@ -2,4 +2,5 @@
 *.log
 *.nav
 *.snm
-
+*.toc
+*.out

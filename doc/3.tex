@@ -438,7 +438,7 @@ unbiased estimator of $\sigma_b$
 				x index = {0},
 				y index = {1},
 				col sep = space
-			] {../data/exp2g.csv};
+			] {../data/exp1g.csv};
 
 		\end{axis}
 	\end{tikzpicture}
@@ -622,6 +622,44 @@ The results show how each variable affects the overall error.
 	\includegraphics[width=\linewidth]{img/exp4}
 	%\caption{Different error mean for each variable.}
 	%\label{fig:errhh}
+\end{figure}
+
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Error by condition number}
+
+\begin{figure}[h]
+	\begin{tikzpicture}
+		\begin{axis}[
+%			scale only axis,
+			xlabel={$\log(\kappa)$},
+			ylabel={$b+\log(\epsilon_b)$},
+%			ylabel={$\overline Y$},
+			height=0.8*\textheight,
+			grid = both,
+%			xmin=0,xmax=100
+		]
+			\addplot+ [
+				mark=none,
+				only marks,
+%				mark size = 0.5pt
+			] table [
+				x index = {1},
+				y index = {0},
+				col sep = space
+			] {../data/exp5b.csv};
+
+		\end{axis}
+	\end{tikzpicture}
+	%\includegraphics[width=\textwidth]{bighh}
+	\caption{Using a fixed bit-width $b=50$ the error is plotted against the 
+condition number.}
+	\label{fig:errhh}
 \end{figure}
 
 
