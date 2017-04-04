@@ -1,8 +1,0 @@
-\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
-\BOOKMARK [1][-]{section.2}{Householder tridiagonalization}{}% 2
-\BOOKMARK [1][-]{section.3}{Eigenvalue sensitivity}{}% 3
-\BOOKMARK [1][-]{section.4}{First approach}{}% 4
-\BOOKMARK [2][-]{subsection.4.1}{Computing eigenvalues and eigenvectors}{section.4}% 5
-\BOOKMARK [2][-]{subsection.4.2}{Tridiagonalization algorithms}{section.4}% 6
-\BOOKMARK [2][-]{subsection.4.3}{Diagonalization algorithms}{section.4}% 7
-\BOOKMARK [1][-]{section.5}{Reduction of bit-width}{}% 8

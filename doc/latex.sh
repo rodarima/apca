@@ -16,7 +16,8 @@ while [ 1 ]; do
 
 	inotifywait -e modify $TEX $FILES
 
-	pdflatex $TEX_FLAGS $TEX
+	#pdflatex $TEX_FLAGS $TEX
+	make "$PDF"
 	if [ "$?" != "0" ]; then
 		echo -e "\a"
 		continue
