@@ -21,3 +21,4 @@ all:
 
 clean:
 	latexmk -CA
+	rm -rf *.snm *.nav
