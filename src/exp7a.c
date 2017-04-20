@@ -19,6 +19,38 @@
 
 #define CSV_HEADER "n bits err time time_gold"
 
+
+#include <linux/version.h>
+
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(3,7,0)
+
+#define RANDOM_DEV "/dev/urandom"
+
+/* getrandom is not yet available on 2.6 Linux.
+ * This is only a mock. Flags are ignored. */
+int getrandom(void *buf, size_t buflen, unsigned int flags)
+{
+	FILE *f;
+	size_t r;
+
+	f = fopen(RANDOM_DEV, "r");
+
+	if(!f) return -1;
+
+	r = fread(buf, 1, buflen, f);
+
+	fclose(f);
+
+	return r;
+}
+
+#else
+#include <linux/random.h>
+#endif
+
+
+FILE *outfile;
+
 double sec()
 {
 	struct timeval t;
@@ -90,7 +122,7 @@ void errcond(
 
 	e = mpfr_get_d(norm2_err, gold->rnd);
 
-	printf("%d %d %f %e %e\n", n, bits, bits+log2(e), t, time_gold);
+	fprintf(outfile, "%d %d %f %e %e\n", n, bits, bits+log2(e), t, time_gold);
 
 //	mpfr_printf("%d\t%d\t%d\t%.20Rg\t%.20Rg\t%.20Rg\t%.20Rg\n",
 //		phh[var], var, gold->n, err1, err, norm2_err, norm2_rel);
@@ -209,7 +241,7 @@ void test_rnd(gmp_randstate_t state, int n, int bits)
 void test_size(gmp_randstate_t st, int n, int bits)
 {
 	test_rnd(st, n, bits);
-	fflush(stdout);
+	fflush(outfile);
 }
 
 void usage(int argc, char *argv[])
@@ -241,10 +273,12 @@ void usage(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
 	int n, bits = 0, runs = 1, i;
+	char *filename = NULL;
 	gmp_randstate_t state;
+	unsigned long int seed;
 
 
-	if(argc < 2 || argc > 4) usage(argc, argv);
+	if(argc < 2 || argc > 5) usage(argc, argv);
 
 	n = (int) atoi(argv[1]);
 
@@ -252,18 +286,39 @@ int main(int argc, char *argv[])
 
 	if(argc > 3) runs = (int) atoi(argv[3]);
 
+	if(argc > 4) filename = argv[4];
+
 	if(n <= 0) usage(argc, argv);
 	if(bits < 0) usage(argc, argv);
 	if(runs <= 0) usage(argc, argv);
 
+	if(filename)
+	{
+		outfile = fopen(filename, "w");
+		if(!outfile)
+		{
+			perror("fopen");
+			exit(1);
+		}
+	}
+	else
+	{
+		outfile = stdout;
+	}
+
 	gmp_randinit_default(state);
 
+	while(getrandom(&seed, sizeof(seed), 0) != sizeof(seed));
 
-	fprintf(stdout, "%s\n", CSV_HEADER);
+	gmp_randseed_ui(state, seed);
+
+	fprintf(outfile, "%s\n", CSV_HEADER);
 	for(i = 0; i < runs; i++)
 	{
 		//fprintf(stderr, "Step %d of %d\n", i, runs);
 		test_size(state, n, bits);
 	}
+
+	fclose(outfile);
 	return 0;
 }

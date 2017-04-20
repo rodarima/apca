@@ -1,0 +1,10 @@
+#!/bin/bash
+# @ job_name= dummy-load
+# @ class = projects
+# @ total_tasks = 10
+# @ wall_clock_limit = 00:01:00
+# @ initialdir = /home/bsc28/bsc28557/jobs/
+# @ error = stderr-%j.log
+# @ output = stdout-%j.log
+
+./work.sh 30

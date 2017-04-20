@@ -1,0 +1,10 @@
+#!/bin/bash
+#!!!SBATCH -n 2
+#SBATCH -a 1-100
+#SBATCH -n 1
+#SBATCH -o data/exp7/mini-%a.out
+#SBATCH -D /home/bsc28/bsc28557/proj/apca/
+
+for n in $(seq 100 50 1000); do
+	src/exp7 $n
+done

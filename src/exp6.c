@@ -238,7 +238,7 @@ void load_matrix(struct mptridiag_t *rop, double A[N][N])
 
 void test_rnd(gmp_randstate_t state, int n)
 {
-	int i, j;
+	int i;
 	struct mptridiag_t *gold, *target, *ref;
 
 	mpfr_prec_t prec_vec[VARS_TOTAL];
@@ -271,6 +271,7 @@ void test_rnd(gmp_randstate_t state, int n)
 			//load_matrix(target, AA);
 			copy_mpmat(target, ref);
 			errcond(gold, target, prec_vec, 0);
+			fflush(stdout);
 			//printf("Target diagonal:\n");
 			//mpvector_print(target->diag, target->n);
 			mptridiag_free(target);
@@ -284,12 +285,19 @@ void test_rnd(gmp_randstate_t state, int n)
 
 #define N_MIN 500
 #define N_MAX 5000
-#define N_MUL 1.5
-#define N_SUM 5
+#define N_MUL 1.2
+#define N_SUM 0
 
 void test_size(gmp_randstate_t st)
 {
 	int n;
+	fprintf(stderr, "Computing for n = ");
+
+	for(n = N_MIN; n <= N_MAX; n = n*N_MUL + N_SUM)
+		fprintf(stderr, "%d ", n);
+
+	fprintf(stderr, "\n");
+
 	for(n = N_MIN; n <= N_MAX; n = n*N_MUL + N_SUM)
 	{
 		//printf("n = %d\n", n);

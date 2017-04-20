@@ -1,0 +1,35 @@
+#!/bin/bash
+#!!!SBATCH -n 2
+#SBATCH -a 1-230
+#SBATCH -n 1
+#SBATCH -o data/exp7a/r3-%a.out
+#SBATCH -D /home/bsc28/bsc28557/proj/apca/
+#SBATCH --mem-per-cpu=15000
+
+N=$(seq 600 200 5000)
+B=$(seq 10 10 100)
+CONFS=$(echo "$N" | wc -l)
+ID=$SLURM_ARRAY_TASK_ID
+i=$(( ($ID - 1) % $CONFS + 1 ))
+bi=$(( ($ID - 1) / $CONFS + 1 ))
+n=$(echo "$N" | sed -n "${i}p")
+b=$(echo "$B" | sed -n "${bi}p")
+r=3
+
+OUTFILE="data/exp7a/r${r}-n${n}-b${b}-${ID}.csv"
+
+# Check if the data was already computed previously
+
+PREV=$(grep "^${n} ${b} " "data/exp7a/merged-after-r2.csv" | wc -l)
+
+# If we already have $n runs, skip
+
+if [ $PREV -ge $r ]; then
+	echo "Already computed $PREV runs for n=${n} b=${b}"
+	exit 0
+fi
+
+# If not found, run more
+
+echo "r=$r n=$n bits=$b"
+src/exp7a $n $b 1 "$OUTFILE"

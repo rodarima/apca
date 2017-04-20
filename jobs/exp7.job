@@ -1,0 +1,8 @@
+#!/bin/bash
+#!!!SBATCH -n 2
+#SBATCH -a 1-50
+#SBATCH -n 10
+#!!!SBATCH -o data/exp7-%a.out
+#SBATCH -D /home/bsc28/bsc28557/proj/apca/
+
+src/exp7 50

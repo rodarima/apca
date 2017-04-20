@@ -1,0 +1,17 @@
+#!/bin/bash
+#!!!SBATCH -n 2
+#SBATCH -a 1-230
+#SBATCH -n 1
+#SBATCH -o data/exp7/big/%a.out
+#SBATCH -D /home/bsc28/bsc28557/proj/apca/
+#SBATCH --mem-per-cpu=10000
+
+N=$(seq 600 200 5000)
+CONFS=$(echo "$N" | wc -l)
+ID=$SLURM_ARRAY_TASK_ID
+i=$(( ($ID - 1) % $CONFS + 1 ))
+r=$(( ($ID - 1) / $CONFS + 1 ))
+n=$(echo "$N" | sed -n "${i}p")
+
+#echo "Run $r, with n=$n"
+src/exp7 $n

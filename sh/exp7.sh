@@ -1,3 +1,3 @@
-for n in $(seq 10 10 300); do
-	./exp7 $n 50
+for n in $(seq 100 50 1000); do
+	src/exp7 $n
 done
