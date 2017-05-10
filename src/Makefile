@@ -5,7 +5,7 @@ CFLAGS=-O2 -Wall -I/apps/MPFR/3.1.5/include -L/apps/MPFR/3.1.5/lib
 LDFLAGS=-lm -lmpfr -lgmp
 
 OBJECTS=error big test precision test_ql test_mpvector test_householder errhh \
-errcond errn exp6 exp7 test2 exp7a exp7b
+errcond errn exp6 exp7 test2 exp7a exp7b exp8a exp8b exp8c
 
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/apps/MPFR/3.1.5/lib/
 
@@ -36,6 +36,12 @@ exp7: mpvector.o reduction.o err.o
 exp7a: mpvector.o reduction.o err.o
 
 exp7b: mpvector.o reduction.o err.o
+
+exp8a: mpvector.o reduction.o err.o
+
+exp8b: mpvector.o reduction.o err.o
+
+exp8c: mpvector.o reduction.o err.o
 
 %.png:
 	gnuplot $(basename $@).gp
