@@ -1,0 +1,218 @@
+\documentclass[serif, 12pt]{beamer}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+
+\usepackage{color}
+
+%\usepackage{algorithm2e}
+\usepackage{hyperref}
+\usepackage{algorithm,algorithmic}
+\usepackage{changepage}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepgfplotslibrary{statistics}
+
+\newcommand*\mat[1]{ \begin{pmatrix} #1 \end{pmatrix}}
+\newcommand*\arr[1]{ \begin{bmatrix} #1 \end{bmatrix}}
+\newcommand*\V[1]{ \boldsymbol{#1}}
+
+\newcommand*\D{\textcolor{violet}{D}}
+\newcommand*\T{\textcolor{blue}{T}}
+
+\setbeamertemplate{navigation symbols}{}%remove navigation symbols
+
+\setbeamerfont{page number in head/foot}{size=\small}
+\setbeamertemplate{footline}[frame number]
+
+\title{Approximated PCA}
+\subtitle{Experiment 8}
+
+\author{Rodrigo Arias} % Your name
+\date{\today} % Date, can be changed to a custom date
+
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Objective}
+
+The objective of the experiment 8 is to analyze the behaviour of concatenating 
+rounding operations.
+
+\vspace{1em}
+The rounding effects can be analyzed both theoretically and experimentally by 
+using MPFR as the \textsl{real} result.
+
+\vspace{1em}
+Perform a set of experiments, and draw the error distribution as the number of 
+operations increase.
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Notation}
+\begin{center}
+\begin{tabular}{l  l}
+$x$ 											& Real number \\
+$\tilde x = fl(x)$		 		& Approximation of $x$ \vspace{1em} \\
+$\Delta = x-\tilde{x}$ 		& Rounding error, or simply error \\
+$|\Delta|$								& Absolute error \vspace{1em} \\
+$\delta = \Delta / |x|$		& Signed relative error \\
+$|\delta| = |\Delta|/|x|$	& Relative error \vspace{1em} \\
+$\epsilon = 2^{-b}$				& Maximum relative error. $|\delta| \le \epsilon$ \\
+\end{tabular}
+\end{center}
+
+\end{frame}
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Simple rounding, experiment 8a}
+
+We generate a uniform random number $x \in [0.5, 1]$, and we apply a rounding 
+operation to store an aproximation in 10 bits.
+
+$$ \tilde{x} = fl(x) $$
+
+Then, we measure the error $\Delta = x - \tilde x$. After some runs, we get the 
+experimental distribution of $\Delta$.
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Distribution of $\Delta$}
+
+Let $x$ be a number from a uniform random distribution in $[0.5,1]$. Let 
+$\tilde{x} = fl(x)$, and with $b=10$, $\epsilon \approx 9.766 \cdot 10^{-4}$
+%%
+%\\\vspace{1em}
+%%
+%And so, the error $\Delta = x_1 - \tilde{x}_1 = r_1 - fl(r_1)$
+%%
+%\\\vspace{1em}
+%%
+%The error $\Delta$ is distributed as a uniform r.v. But as n increases starts to 
+%shape as a normal distribution.
+%
+%
+\\\vspace{1em}
+%
+\includegraphics[width=.9\textwidth]{img/px.pdf}
+%
+\\\vspace{1em}
+%
+The probability that $x$ falls in the interval $\tilde x \pm \epsilon$ is 
+constant, as each interval has the same size. Inside the interval, the error 
+$\Delta$ is equivalent to a uniform distribution in $[-\epsilon/2, 
++\epsilon/2]$.
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+	\centering
+	\includegraphics[width=\textwidth]{img/half-prob.png}
+\end{frame}
+
+
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Experiment 8c, multiple operations}
+
+Let $(r_i)$ be a sequence of uniformly distributed random numbers in $[0, 1]$, 
+and
+%
+\begin{equation}
+\begin{array}{ll}
+\begin{split}
+	x_0 &= 0 \\
+	x_i &= x_{i-1} + r_i
+\end{split}
+&\quad
+\begin{split}
+	\tilde{x}_0 &= fl(0) = 0 \\
+	\tilde{x}_i &= fl(\tilde{x}_{i-1} + r_i)
+\end{split}
+\\
+\end{array}
+\end{equation}
+%
+Then we observe the error $\Delta = x_n - \tilde{x}_n$ as $n$ grows.
+
+\end{frame}
+
+%------------------------------------------------
+
+\foreach \n in {1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100}
+{
+	\begin{frame}
+%	\frametitle{Generated slide at $n=\n$}
+	\centering
+	\includegraphics[width=\textwidth]{img/8c-gsum-err-100000-\n-10.png}
+	\end{frame}
+}
+
+%------------------------------------------------
+
+\foreach \n in {1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100}
+{
+	\begin{frame}
+%	\frametitle{Generated slide at $n=\n$}
+	\centering
+	\includegraphics[width=\textwidth]{img/8c-hist-err-100000-\n-10.png}
+	\end{frame}
+}
+
+%------------------------------------------------
+
+\foreach \n in {1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100}
+{
+	\begin{frame}
+%	\frametitle{Generated slide at $n=\n$}
+	\centering
+	\includegraphics[width=\textwidth]{img/8c-qqnorm-err-100000-\n-10.png}
+	\end{frame}
+}
+
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Distribution of $\Delta$}
+
+As $n$ grows, the error $\Delta$ seems to approach a normal distribution.
+
+\vspace{1em}
+The mean $\mu$ is centered at 0, but the variance $\sigma^2$ seems to grow.
+
+\vspace{1em}
+After 1 operation, the expected theorical variance is
+$$ \sigma^2 = \frac{1}{12} \epsilon^2 $$
+
+\vspace{1em}
+With 2 operations,
+$$ \sigma^2 = \frac{1}{7} \epsilon^2 $$
+
+\vspace{1em}
+The relation between $\sigma^2$ and $n$ is not yet known.
+
+\end{frame}
+
+\end{document}
