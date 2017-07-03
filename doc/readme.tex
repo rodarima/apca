@@ -6,6 +6,7 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{pgfplots}
+\usepackage{pgfplotstable}
 
 \usepackage{minted}
 \newminted{py}{%
@@ -218,14 +219,14 @@ algorithms can be used to compute the diagonalization:
 All these algorithms are iterative and $n \times n$ is the dimension of the 
 matrix~$A$.
 
-\section{Reduction of bit-width}
+\section{Experiments with the bit-width}
 
 The reduction of bits in the mantisa of the floating points used by the 
 algorithm can lead to an acceleration in the ALU. However, the precision of the 
 results can be affected by the number of bits used.
 
-For this reason, an experiment is designed, to test how the precision is reduced 
-as the number of bits of the mantisa is also reduced.
+For this reason, a set of experiments are performed, to test how the error grows 
+as the number of bits of the mantisa is reduced.
 
 The library MPFR is designed to perform computations with an arbitrary mantissa 
 length. After rewrite the Householder algorithm, the results can be compared 
@@ -233,43 +234,370 @@ with a golden execution. This golden execution is done with a very big mantissa,
 such that the error of the result is so low that can be ignored, compared with 
 the errors produced in the experiments.
 
-The experiment is performed as follows: First, a random symmetric matrix $A$ of 
-fixed size $N\times N$ is created. Then, the Householder triangulation is 
-computed very precisely, using $b_g$ bits. Finally, the algorithm is recomputed 
-with different mantissa lengths, from $b_{min}$ to $b_{max}$.
+The aim of this set of experiments is to reduce the storage size needed while 
+keeping a reasonable error.
 
-With the parameters $N = 5$, $b_g=500$, $b_{min} = 2$ and $b_{max}=100$, the 
-experiment is repeated 100 times. The difference from the diagonal with reduced 
-precision is compared to the golden result, and the 2-norm is measured. The 
-errors can be seen in the figure~\ref{fig:errhh} as the length of the mantisa 
-grows.
+\newpage
+\subsection*{Experiment A}
 
+\paragraph{Objective}
+Understand how the bit-width $b$ affects the error in the Householder algorithm.
+
+\paragraph{Description}
+For an input matrix $A$ symmetric and random, of size $n\times n$ with $n=5$, a 
+gold result is computed, using a high precision computation with $b = 500$.  
+Then, in each run, the bit-width $b$ is set to a value in the range $[2, 100]$ 
+and Householder runs again on the same input.
+The error $\Delta$ is measured compared as with the golden result.
+
+\paragraph{Result}
+The error is drawn as the bit-width $b$ grows.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{img/err.pdf}
+\end{figure}
+
+\paragraph{Conclusion}
+It can be observed that $\log_2 \Delta$ is close to $-b$. More experiments are 
+needed to test this hypothesis.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection*{Experiment B}
+
+\paragraph{Objective}
+Test if the relation between the $\log_2 \Delta$ and $b$ is linear.
+
+\paragraph{Description}
+Let $X_b = \log_2 \Delta$ and $Y = b + \overline X_b$. We can now plot $Y$ as 
+$b$ grows. If $\overline X_b = -b$, then $Y$ should be 0. For each bit-width $b$ 
+in the range $[2, 100]$, a set of 10000 simulations are performed with $n=5$, 
+and the sample mean $\overline X_b$ is computed.
+
+\paragraph{Result}
+The random variable $Y$ seems to be constant as the bit-width grows, as can be 
+seen in the figure~\ref{fig:expB}.
 \begin{figure}[h]
 	\begin{tikzpicture}
-		\begin{semilogyaxis}[
+		\begin{axis}[
+%			scale only axis,
+			xlabel={$b$},
+			ylabel={$b + \overline X_b$},
+			width=\textwidth,
+			height=0.7\textwidth,
 			grid = both,
-			width = \linewidth
 		]
 			\addplot+ [
-				only marks,
-				mark size = 0.5pt
+				mark=none,
+%				only marks,
+%				mark size = 0.5pt
 			] table [
 				x index = {0},
 				y index = {1},
 				col sep = space
-			] {../src/firsthh.csv};
-		\end{semilogyaxis}
+			] {../data/exp1f.csv};
+		\end{axis}
 	\end{tikzpicture}
 	%\includegraphics[width=\textwidth]{bighh}
-	\caption{Experiments with Householder on different mantisa lengths.}
-	\label{fig:errhh}
+	\caption{Plot of $b + \overline X_b$ as the number of bits $b$ increases.}
+	\label{fig:expB}
 \end{figure}
 
-The experiments shows that the error is decreased as the precision grows. The 
-data shows a linear relationship between the length of the mantissa and the 
-logarithm of the error.
+\paragraph{Conclusion}
+Further statistical analysis reveals that, if the values with $b<5$ are not 
+considered, $Y$ is independent of $b$, and has a mean in the interval $2.68691 
+\pm 0.00190$ at a confidence level of $0.95$. Then, the relation between 
+$\overline X_b$ and $b$ is linear. More experiments are needed to determine if 
+the mean of $Y$ is always constant.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection*{Experiment C}
+
+\paragraph{Objective}
+Test if there is any relation between $Y$ and the precision of each variable of 
+the Householder algorithm.
+
+\paragraph{Description}
+The precision is now determined by a vector $\V b$, so that each variable used 
+in the Householder algorithm is assigned a own $b_i$. Let $\V v$ be the set of
+variables. Then $v_1$ is the matrix A, $v_2$ the diagonal, $v_3$ the 
+offdiagonal, and the others $v_i$ are the internal parameters of Householder 
+algorithm. The variable $v_i$ is set a bit-width of $b_i$. The experiment is 
+repeated as in the experiment B, but we only change one $b_i$ at the time, 
+selecting a precision from [5,100], while the others are set at 500 bits.
+
+\paragraph{Result}
+The experiments show that the variable $v_4$ don't produce any error in the 
+output. This variable is a internal scale variable of the Householder algorithm, 
+and will be ignored, to show the other variables.
+
+\begin{figure}[h]
+	\begin{tikzpicture}
+		\begin{axis}[
+%			scale only axis,
+			xlabel={$b$},
+			ylabel={$b+\overline X_b$},
+%			ylabel={$\overline Y$},
+			width=.85\textwidth,
+			grid = both,
+%			xmin=0,xmax=100
+			legend pos=outer north east,
+		]
+			\addplot+ table {../data/exp3v0.csv};
+			\addplot+ table {../data/exp3v1.csv};
+			\addplot+ table {../data/exp3v2.csv};
+%			\addplot+ table {../data/exp3v3.csv};
+			\addplot+ table {../data/exp3v4.csv};
+			\addplot+ table {../data/exp3v5.csv};
+			\addplot+ table {../data/exp3v6.csv};
+			\addplot+ table {../data/exp3v7.csv};
+			\addplot+ table {../data/exp3v8.csv};
+			\legend{$v_1$,$v_2$,$v_3$,$v_5$,$v_6$,$v_7$,$v_8$,$v_9$};
+		\end{axis}
+	\end{tikzpicture}
+	%\includegraphics[width=\textwidth]{bighh}
+	\caption{Different error mean for each variable.}
+	\label{fig:expC}
+\end{figure}
+
+\paragraph{Conclusion}
+It can be shown that the precision of the variables affect the value of the $Y$, 
+and also that is independent of the value of $b$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection*{Experiment D}
+
+\paragraph{Objective}
+Test if there is any relation between $Y$ and the condition number $\kappa$ of 
+the input matrix.
+
+\paragraph{Description}
+The Householder algorithm is executed with a fixed bit-width $b = 50$ and 
+compared with the gold result with $b=500$. The error is plotted against the 
+logarithmic condition number $\log \kappa$ computed from the input matrix.
+
+\paragraph{Result}
+In the figure~\ref{fig:expD} it can be seen that there is no clear relationship 
+between the condition number and $Y$.
+\begin{figure}[h]
+	\begin{tikzpicture}[baseline]
+		\begin{axis}[
+%			scale only axis,
+			xlabel={$\log(\kappa)$},
+			ylabel={$b+\log(\epsilon_b)$},
+%			ylabel={$\overline Y$},
+			width=\textwidth,
+			grid = both,
+%			xmin=0,xmax=100
+		]
+			\addplot+ [
+				mark=none,
+				only marks,
+%				mark size = 0.5pt
+			] table [
+				x index = {1},
+				y index = {0},
+				col sep = space
+			] {../data/exp5b.csv};
+
+		\end{axis}
+	\end{tikzpicture}
+	%\includegraphics[width=\textwidth]{bighh}
+	\caption{Using a fixed bit-width $b=50$ the error is plotted against the 
+condition number.}
+	\label{fig:expD}
+\end{figure}
+
+\paragraph{Conclusion}
+The condition number doesn't affect the random variable $Y$ in a meaningful way.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection*{Experiment E}
+
+\paragraph{Objective}
+Determine the relation between $Y$ and $n$.
+
+\paragraph{Description}
+The Householder algorithm is executed varying both the bit-width $b$ and the 
+size of the $n \times n$ input matrix. The error is measured by computing the 
+norm-2 of the difference between the output vectors of the gold result, and the 
+current result.
+
+\paragraph{Result}
+The mean of the sample $Y$ is computed from the values with the same input size 
+$n$. In the figure~\ref{fig:expE}, the cubic mean $\overline Y^3$ is plotted 
+against $n$.
+
+
+\begin{figure}[h]
+	\begin{tikzpicture}[baseline]
+		\begin{axis}[
+%			scale only axis,
+			xlabel={$n$},
+			ylabel={$\overline Y^3$},
+%			ylabel={$\overline Y$},
+			width=\textwidth,
+			grid = both,
+%			xmin=0,xmax=100
+		]
+			\addplot+ [
+%				mark=none,
+%				only marks,
+%				mark size = 0.5pt
+			] table [
+				x index = {0},
+				y index = {1},
+				col sep = space
+			] {../data/exp6d.csv};
+
+
+		\end{axis}
+	\end{tikzpicture}
+	\caption{The error $\overline Y^3$ is computed with varying matrix sizes $n$.}
+	\label{fig:expE}
+\end{figure}
+
+
+\paragraph{Conclusion}
+It can be seen that the relation between $\overline Y^3$ and $n$ seems linear, 
+but more data is necessary. A new experiment should be designed to cope with 
+bigger matrices.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection*{Experiment F}
+
+\paragraph{Objective}
+Determine the relation between $Y$ and $n$ when $n$ is big.
+
+\paragraph{Description}
+The experiment E is now designed to deal with bigger matrices, and is executed 
+with values of $n$ in the range of [500, 5000].  To compute the exact exponent, 
+we plot the ratio $Y/\log_2 n$ as $n$ grows.
+
+\paragraph{Result}
+It can be seen that the ratio is almost constant, as $n$ grows, and the mean is 
+2.78857, represented as a red line in the figure~\ref{fig:expF}.
+\begin{figure}[h]
+	\begin{tikzpicture}
+		\begin{axis}[
+%			scale only axis,
+			%ymode=log,
+			%xmode=log,
+			log basis y={2},
+			xlabel={$n$},
+			ylabel={$Y/\log_2 n$},
+%			ylabel={$\overline Y$},
+			width=\linewidth,
+			height=.7\linewidth,
+			grid = both,
+%			xmin=0,xmax=100
+			legend pos=south east,
+			x tick label style={log ticks with fixed point},
+		]
+
+			\addplot+ [
+%				mark=none,
+				only marks,
+				mark size = 0.7pt
+			] table [
+				x index = {0},
+				y index = {2},
+				col sep = space
+			] {../data/exp7a/Y-n3-big.csv};
+			\addplot+ [mark=none, red]
+				coordinates {(500, 2.78857) (5000, 2.78857)};
+
+		\end{axis}
+	\end{tikzpicture}
+	\caption{The error $\overline Y$ with varying matrix sizes $n$.}
+	\label{fig:expF}
+\end{figure}
+\paragraph{Conclusion}
+The error $Y$ seems to grow with $n$, with a power of $\alpha = 2.78857$,
+%
+$$Y/\log_2(n) \approx 2.78857 = \alpha $$
+%
+So, we can compute an approximation of the rounding error $\Delta$ as a function 
+of $b$ and $n$, for bigger values of $n$.
+%
+$$ X = \log_2(\Delta) \approx -b + Y = -b + \alpha \log_2(n) $$
+%
+And as $\epsilon = 2^{-b}$, we get:
+%
+$$ \Delta \approx \epsilon \cdot n^\alpha $$
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection*{Experiment G}
+
+\paragraph{Objective}
+Determine if we can use less storage space while maintaining a low error, with 
+different precisions in the variables of Householder algorithm, as well as the 
+input matrix $A$, and the two vectors diagonal and offdiagonal.  
+
+\paragraph{Description}
+In this experiment the variables used in the Householder algorithm are set with 
+individual precisions. The input matrix A and the diagonal vectors diagonal and 
+offdiagonal are set each with individual precisions.
+The golden result is computed using 500 bits of precision in all the variables.  
+The storage size is plotted against the error.
+
+\paragraph{Result}
+It can be seen in the figure~\ref{fig:expG} the relation between the error and 
+the storage size in bits. When the main variables like the input matrix $A$, or 
+the diagonal and offdiagonal vectors are assigned a low precision, less space is 
+needed, but the error increases. Also, by using a mix of high and low precision 
+variables, the error keeps high.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=.7\textwidth]{img/expG.pdf}
+	\caption{The error $\overline Y$ with varying matrix sizes $n$.}
+	\label{fig:expG}
+\end{figure}
+
+\paragraph{Conclusion}
+It seems better to select all precision to the same value, in order to obtain 
+the smallest error.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection*{Experiment H}
+
+\paragraph{Objective}
+Determine the effect of the precision in the different elements in the input 
+matrix $A$ and the vector diagonal and offdiagonal, as they change.
+
+\paragraph{Description}
+In each step, a random configuration of bits is assigned to each element in the 
+matrix and in both vectors. The possible values are $\{8,16,32,64\}$, and are 
+selected randomly with a probability of $1/4$ each.
+
+Once the configuration of bits for the data storage is completed, the 
+Householder algorithm runs with the internal variables at 64 bits. Then, the 
+error is computed from the gold result.
+
+\paragraph{Result}
+It can be seen, in red, the configurations now have a big error and use more 
+space than the previous experiment.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=.7\textwidth]{img/expH.pdf}
+	\caption{The error $\overline Y$ with varying matrix sizes $n$.}
+	\label{fig:expG}
+\end{figure}
+
+\paragraph{Conclusion}
+Is better to left all the precisions inside the matrix or vectors to the same 
+value.
 
 
 

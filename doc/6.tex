@@ -1,0 +1,204 @@
+\documentclass[serif, 12pt]{beamer}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+
+\usepackage{color}
+
+%\usepackage{algorithm2e}
+\usepackage{hyperref}
+\usepackage{algorithm,algorithmic}
+\usepackage{changepage}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepgfplotslibrary{statistics}
+
+\newcommand*\mat[1]{ \begin{pmatrix} #1 \end{pmatrix}}
+\newcommand*\arr[1]{ \begin{bmatrix} #1 \end{bmatrix}}
+\newcommand*\V[1]{ \boldsymbol{#1}}
+
+\newcommand*\D{\textcolor{violet}{D}}
+\newcommand*\T{\textcolor{blue}{T}}
+
+\setbeamertemplate{navigation symbols}{}%remove navigation symbols
+
+\setbeamerfont{page number in head/foot}{size=\small}
+\setbeamertemplate{footline}[frame number]
+
+\title{Approximated PCA}
+\subtitle{Iteration 6}
+
+\author{Rodrigo Arias} % Your name
+\date{\today} % Date, can be changed to a custom date
+
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Reduction of space in Householder}
+
+The Householder algorithm needs 6 internal f.p. variables to perform the 
+tridiagonalization.
+
+\vspace{1em}
+
+Also, 3 arguments are reused to store the results:
+\begin{itemize}
+\item The matrix $A$ with size $n\times n$
+\item The diagonal $d$ with size $n$
+\item The offdiagonal $o$ with size $n$
+\end{itemize}
+
+\vspace{1em}
+
+In total, 9 variables are used.
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+
+\frametitle{Individual precision}
+
+\begin{itemize}
+\item The 3 arguments have the bigger impact (multiple elements) as shown by 
+previous experiments.
+\item Different precisions can be set to individual elements.
+\item We can compare results between different configurations.
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Experiment H}
+
+A new experiment can be designed, to test individual precisions.
+\vspace{1em}
+
+\begin{itemize}
+
+\item Each element is assigned a random precision from $C = \{8, 16, 32, 64\}$, 
+with equal probability
+\item The other variables are kept at 64 bits.
+\item The storage size and the error is plotted.
+
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+
+\centering
+\includegraphics[width=\textheight]{img/expH.pdf}
+$n=5$
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Results obtained}
+
+\begin{itemize}
+
+\item The results obtained have a bigger error and use more size.
+\item It seems that there is no advantage in using different precisions in 
+individual elements.
+\item The utility function can be used to compare the results
+
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Utility function}
+
+Assuming that we are interested only in the reduction of \textbf{storage size} 
+$s$, while maintaining a low error, the utility function $u$ can be defined as:
+$$ u = \textrm{error} + \textrm{size} $$
+However, both quantitites need to be scaled acordingly, so that a unit reduction 
+of error, is equally good as a unit of reduction of size.
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Scaling error and size}
+
+We can use the relation between error and space $s$ that we measured 
+experimentally.
+$$ \log_2 \Delta \approx -b + \alpha \log_2 n $$
+Then, $u$ becomes
+$$ u(\Delta, b, n) = \log_2 \Delta + b - \alpha \log_2 n $$
+where $b$ is the mean bit-width, $n$ is the size of the input $n\times n$ 
+matrix, and $\alpha = 2.78857$.
+
+\end{frame}
+
+%------------------------------------------------
+%------------------------------------------------
+
+\begin{frame}
+
+\centering
+\includegraphics[width=\textheight]{img/exp10-u.pdf}
+$n=5$
+
+\end{frame}
+%------------------------------------------------
+
+\begin{frame}
+
+\centering
+\includegraphics[width=\textheight]{img/exp10-bestu.pdf}
+$n=5$
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Conlusions}
+
+The best results (from the point of view of the utility function) are those 
+that:
+\begin{itemize}
+\item Maintain the same precision in individual elements
+\item Use all the variables to the same value $b$
+\item Except for the scale variable, which has almost no influence in the error.
+\end{itemize}
+
+\end{frame}
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Caveats and posible solutions}
+
+The current utility function does not measure the time nor the energy. A posible 
+solution could be done by simulation.
+
+\begin{itemize}
+\item A simulation can estimate the time of the floating point units with 
+bit-width $b$.
+\item The IO operations in RAM and cache can be simulated and measured.
+\item The conversion between different bit-width variables needs to be also 
+accounted.
+\end{itemize}
+
+\end{frame}
+%------------------------------------------------
+\end{document}
